@@ -11,6 +11,7 @@ const PASSWORD_INPUT = '[data-testid="password-input"]';
 const AVATAR_DISPLAY = '[id="userPicture"]';
 const AVATAR_LIST = '[id="avatar"]';
 const REGISTER_BUTTON = '[data-testid="register-button"]';
+const EMAIL_ERROR = '[data-testid="alert-popup"]';
 
 export type RegistrationData = {
 	firstName?: string;
@@ -24,13 +25,15 @@ export type RegistrationData = {
 export type RegisterPage = {
 	hoverPageElement: () => Promise<void>;
 	clickPageRegisterButton: () => Promise<void>;
-	fillRegistrationForm(userData: RegistrationData): Promise<void>;
+	fillRegistrationForm: (userData: RegistrationData) => Promise<void>;
 	clickDatepickerDoneButton: () => Promise<void>;
-	selectAvatar(avatarName?: string): Promise<void>;
+	selectAvatar: (avatarName?: string) => Promise<void>;
 	getAvatarList: () => Locator;
 	getAvatarDisplay: () => Locator;
+	getEmailError: () => Locator;
 	getCurrentAvatarSrc: () => Promise<string | null>;
 	clickRegisterButton: () => Promise<void>;
+	getValidationErrorsCount: () => Promise<number>;
 };
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
@@ -43,21 +46,15 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 	},
 
 	fillRegistrationForm: async (userData: RegistrationData) => {
-		if (userData.firstName) {
-			await page.fill(FIRST_NAME_INPUT, userData.firstName);
-		}
-		if (userData.lastName) {
-			await page.fill(LAST_NAME_INPUT, userData.lastName);
-		}
-		if (userData.email) {
-			await page.fill(EMAIL_INPUT, userData.email);
-		}
-		if (userData.birthDate) {
-			await page.fill(BIRTH_DATE_INPUT, userData.birthDate);
-		}
-		if (userData.password) {
-			await page.fill(PASSWORD_INPUT, userData.password);
-		}
+		const fillIfExist = async (value: string | undefined, selector: string) => {
+			if (value) await page.fill(selector, value);
+		};
+
+		await fillIfExist(userData.firstName, FIRST_NAME_INPUT);
+		await fillIfExist(userData.lastName, LAST_NAME_INPUT);
+		await fillIfExist(userData.email, EMAIL_INPUT);
+		await fillIfExist(userData.birthDate, BIRTH_DATE_INPUT);
+		await fillIfExist(userData.password, PASSWORD_INPUT);
 	},
 
 	clickDatepickerDoneButton: async () => {
@@ -78,11 +75,16 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 
 	getAvatarDisplay: () => page.locator(AVATAR_DISPLAY),
 
-	getCurrentAvatarSrc: async () => {
-		return await page.locator(AVATAR_DISPLAY).getAttribute('src');
-	},
+	getEmailError: () => page.locator(EMAIL_ERROR),
+
+	getCurrentAvatarSrc: async () => await page.locator(AVATAR_DISPLAY).getAttribute('src'),
 
 	clickRegisterButton: async () => {
 		await page.click(REGISTER_BUTTON);
+	},
+
+	getValidationErrorsCount: async () => {
+		const errorSelector = '[id*="octavalidate_"]';
+		return await page.locator(errorSelector).count();
 	},
 });
