@@ -9,9 +9,9 @@ const BIRTH_DATE_INPUT = '[data-testid="birthdate-input"]';
 const DATEPICKER_DONE_BUTTON = '.ui-datepicker-close';
 const PASSWORD_INPUT = '[data-testid="password-input"]';
 const AVATAR_DISPLAY = '[id="userPicture"]';
-const AVATAR_LIST = '[id="avatar"]';
+const AVATAR_LIST = 'select[id="avatar"]';
 const REGISTER_BUTTON = '[data-testid="register-button"]';
-const EMAIL_ERROR = '[data-testid="alert-popup"]';
+const ALERT_POPUP = '[data-testid="alert-popup"]';
 
 export type RegistrationData = {
 	firstName?: string;
@@ -30,7 +30,7 @@ export type RegisterPage = {
 	selectAvatar: (avatarName?: string) => Promise<void>;
 	getAvatarList: () => Locator;
 	getAvatarDisplay: () => Locator;
-	getEmailError: () => Locator;
+	getAlertPopup: () => Locator;
 	getCurrentAvatarSrc: () => Promise<string | null>;
 	clickRegisterButton: () => Promise<void>;
 	getValidationErrorsCount: () => Promise<number>;
@@ -62,12 +62,16 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 	},
 
 	selectAvatar: async (avatarName?: string) => {
-		await page.click(AVATAR_LIST);
-
 		if (avatarName) {
-			await page.locator(`${AVATAR_LIST} option[value="${avatarName}"]`).click();
+			await page.selectOption(AVATAR_LIST, avatarName);
 		} else {
-			await page.locator(`${AVATAR_LIST} option`).first().click();
+			const firstOption = await page
+				.locator(`${AVATAR_LIST} option`)
+				.first()
+				.getAttribute('value');
+			if (firstOption) {
+				await page.selectOption(AVATAR_LIST, firstOption);
+			}
 		}
 	},
 
@@ -75,9 +79,9 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 
 	getAvatarDisplay: () => page.locator(AVATAR_DISPLAY),
 
-	getEmailError: () => page.locator(EMAIL_ERROR),
-
 	getCurrentAvatarSrc: async () => await page.locator(AVATAR_DISPLAY).getAttribute('src'),
+
+	getAlertPopup: () => page.locator(ALERT_POPUP),
 
 	clickRegisterButton: async () => {
 		await page.click(REGISTER_BUTTON);

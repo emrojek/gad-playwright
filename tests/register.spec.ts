@@ -20,15 +20,20 @@ test.describe('Registration Form', () => {
 	});
 
 	test('successful user register', async ({ page }) => {
-		await registerPage.fillRegistrationForm({
+		const userData = {
 			firstName: generateRandomName(),
 			lastName: generateRandomSurname(),
 			email: generateRandomEmail(),
 			birthDate: generateRandomDate(),
 			password: 'password123',
-		});
+		};
+
+		await registerPage.fillRegistrationForm(userData);
 		await registerPage.clickDatepickerDoneButton();
 		await registerPage.clickRegisterButton();
+
+		await expect(registerPage.getAlertPopup()).toBeVisible();
+		await expect(registerPage.getAlertPopup()).toContainText('User created');
 		await expect(page).toHaveURL('/login/');
 	});
 
@@ -40,11 +45,10 @@ test.describe('Registration Form', () => {
 	});
 
 	test('should show error for duplicate email during registration', async ({ page }) => {
-		const email = generateRandomEmail();
 		const userData = {
 			firstName: generateRandomName(),
 			lastName: generateRandomSurname(),
-			email: email,
+			email: generateRandomEmail(),
 			password: 'password123',
 		};
 
@@ -59,6 +63,42 @@ test.describe('Registration Form', () => {
 		await registerPage.fillRegistrationForm(userData);
 		await registerPage.clickRegisterButton();
 
-		await expect(registerPage.getEmailError()).toBeVisible();
+		await expect(registerPage.getAlertPopup()).toBeVisible();
+		await expect(registerPage.getAlertPopup()).toContainText(
+			'User not created! Email not unique'
+		);
+	});
+
+	test('should display default avatar', async () => {
+		await expect(registerPage.getAvatarDisplay()).toBeVisible();
+
+		const avatarSrc = await registerPage.getCurrentAvatarSrc();
+		const selectedAvatarValue = await registerPage.getAvatarList().inputValue();
+
+		expect(avatarSrc).not.toBe('');
+		expect(selectedAvatarValue).not.toBe('');
+		expect(avatarSrc).toContain(selectedAvatarValue);
+	});
+
+	test('should change avatar with different option selected', async () => {
+		const firstAvatarSrc = await registerPage.getCurrentAvatarSrc();
+		const avatarOptions = await registerPage
+			.getAvatarList()
+			.locator('option')
+			.allTextContents();
+
+		if (avatarOptions.length > 1) {
+			const secondAvatarSrc = await registerPage
+				.getAvatarList()
+				.locator('option')
+				.nth(1)
+				.getAttribute('value');
+
+			await registerPage.selectAvatar(secondAvatarSrc!);
+
+			const updatedAvatarSrc = await registerPage.getCurrentAvatarSrc();
+
+			expect(updatedAvatarSrc).not.toBe(firstAvatarSrc);
+		}
 	});
 });
