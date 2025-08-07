@@ -15,11 +15,11 @@ test.describe('Registration Form', () => {
 
 		registerPage = createRegisterPage(page);
 
-		await registerPage.hoverPageElement();
+		await registerPage.openUserMenu();
 		await registerPage.clickPageRegisterButton();
 	});
 
-	test('successful user register', async ({ page }) => {
+	test('should register successfully', async ({ page }) => {
 		const userData = {
 			firstName: generateRandomName(),
 			lastName: generateRandomSurname(),
@@ -57,7 +57,7 @@ test.describe('Registration Form', () => {
 		await expect(page).toHaveURL('/login/');
 
 		await page.goto('/');
-		await registerPage.hoverPageElement();
+		await registerPage.openUserMenu();
 		await registerPage.clickPageRegisterButton();
 
 		await registerPage.fillRegistrationForm(userData);

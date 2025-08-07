@@ -23,7 +23,7 @@ export type RegistrationData = {
 };
 
 export type RegisterPage = {
-	hoverPageElement: () => Promise<void>;
+	openUserMenu: () => Promise<void>;
 	clickPageRegisterButton: () => Promise<void>;
 	fillRegistrationForm: (userData: RegistrationData) => Promise<void>;
 	clickDatepickerDoneButton: () => Promise<void>;
@@ -37,7 +37,7 @@ export type RegisterPage = {
 };
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
-	hoverPageElement: async () => {
+	openUserMenu: async () => {
 		await page.hover(PAGE_DROPDOWN_BUTTON);
 	},
 
