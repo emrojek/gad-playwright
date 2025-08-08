@@ -32,21 +32,26 @@ test.describe('Login Form', () => {
 		await registerPage.openUserMenu();
 		await registerPage.clickPageRegisterButton();
 		await registerPage.fillRegistrationForm(validUser);
-		await registerPage.clickRegisterButton();
+		await Promise.all([
+			registerPage.clickRegisterButton(),
+			page.waitForURL('/login/', { waitUntil: 'commit', timeout: 15000 }),
+		]);
 
 		await expect(page).toHaveURL('/login/');
 	});
 
 	test('should login successfully', async ({ page }) => {
+		const welcomeMessage = loginPage.getWelcomeMessage();
+
 		await loginPage.fillLoginForm({
 			email: validUser.email,
 			password: validUser.password,
 		});
 
-		await loginPage.clickFormLoginButton();
+		await Promise.all([loginPage.clickFormLoginButton(), page.waitForURL('/welcome')]);
 
-		await expect(page).toHaveURL('/welcome')
-		await expect(loginPage.getWelcomeMessage()).toBeVisible()
-		await expect(loginPage.getWelcomeMessage()).toContainText(`Hi ${validUser.email}`)
+		await expect(page).toHaveURL('/welcome');
+		await expect(welcomeMessage).toBeVisible();
+		await expect(welcomeMessage).toContainText(`Hi ${validUser.email}`);
 	});
 });

@@ -16,10 +16,16 @@ test.describe('Registration Form', () => {
 		registerPage = createRegisterPage(page);
 
 		await registerPage.openUserMenu();
-		await registerPage.clickPageRegisterButton();
+		await Promise.all([
+			registerPage.clickPageRegisterButton(),
+			page.waitForURL('/register.html'),
+		]);
+
+		await expect(page).toHaveURL('/register.html');
 	});
 
 	test('should register successfully', async ({ page }) => {
+		const alert = registerPage.getAlertPopup();
 		const userData = {
 			firstName: generateRandomName(),
 			lastName: generateRandomSurname(),
@@ -30,10 +36,15 @@ test.describe('Registration Form', () => {
 
 		await registerPage.fillRegistrationForm(userData);
 		await registerPage.clickDatepickerDoneButton();
-		await registerPage.clickRegisterButton();
+		await Promise.all([
+			registerPage.clickRegisterButton(),
+			alert.waitFor({ state: 'visible' }),
+		]);
 
-		await expect(registerPage.getAlertPopup()).toBeVisible();
-		await expect(registerPage.getAlertPopup()).toContainText('User created');
+		await expect(alert).toBeVisible();
+		await expect(alert).toHaveText('User created', { timeout: 15000 });
+
+		await page.waitForURL('/login/');
 		await expect(page).toHaveURL('/login/');
 	});
 
@@ -45,6 +56,7 @@ test.describe('Registration Form', () => {
 	});
 
 	test('should show error for duplicate email during registration', async ({ page }) => {
+		const alert = registerPage.getAlertPopup();
 		const userData = {
 			firstName: generateRandomName(),
 			lastName: generateRandomSurname(),
@@ -53,20 +65,27 @@ test.describe('Registration Form', () => {
 		};
 
 		await registerPage.fillRegistrationForm(userData);
-		await registerPage.clickRegisterButton();
+		await Promise.all([
+			registerPage.clickRegisterButton(),
+			page.waitForURL('/login/', { waitUntil: 'commit', timeout: 15000 }),
+		]);
+
 		await expect(page).toHaveURL('/login/');
 
 		await page.goto('/');
 		await registerPage.openUserMenu();
-		await registerPage.clickPageRegisterButton();
+		await Promise.all([
+			registerPage.clickPageRegisterButton(),
+			page.waitForURL('/register.html'),
+		]);
+
+		await expect(page).toHaveURL('/register.html');
 
 		await registerPage.fillRegistrationForm(userData);
 		await registerPage.clickRegisterButton();
 
-		await expect(registerPage.getAlertPopup()).toBeVisible();
-		await expect(registerPage.getAlertPopup()).toContainText(
-			'User not created! Email not unique'
-		);
+		await expect(alert).toBeVisible();
+		await expect(alert).toHaveText('User not created! Email not unique', { timeout: 15000 });
 	});
 
 	test('should display default avatar', async () => {
