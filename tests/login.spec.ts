@@ -1,15 +1,8 @@
 import { test, expect } from '../fixtures/user.fixture';
-import { createLoginPage, LoginPage } from '../pages/login.page';
 
 test.describe('Login Form', () => {
-	let loginPage: LoginPage;
-
-	test.beforeEach(async ({ page }) => {
-		loginPage = createLoginPage(page);
-	});
-
 	test.describe('Tests requiring valid user', () => {
-		test('should login successfully', async ({ page, validUser }) => {
+		test('should login successfully', async ({ page, validUser, loginPage }) => {
 			const welcomeMessage = loginPage.getWelcomeMessage();
 
 			await loginPage.fillLoginForm({
@@ -26,13 +19,13 @@ test.describe('Login Form', () => {
 	});
 
 	test.describe('Tests without user registration', () => {
-		test.beforeEach(async ({ page }) => {
+		test.beforeEach(async ({ page, loginPage }) => {
 			await page.goto('/');
 			await loginPage.openUserMenu();
 			await loginPage.clickPageLoginButton();
 		});
 
-		test('should show error for invalid credentials', async () => {
+		test('should show error for invalid credentials', async ( {loginPage }) => {
 			const welcomeMessage = loginPage.getWelcomeMessage();
 			const errorMessage = loginPage.getFormLoginError();
 

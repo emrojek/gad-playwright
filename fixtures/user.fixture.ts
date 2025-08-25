@@ -1,5 +1,4 @@
-import { test as base } from '@playwright/test';
-import { createRegisterPage } from '../pages/register.page';
+import { test as base } from './pages.fixture';
 import {
 	generateRandomEmail,
 	generateRandomName,
@@ -18,15 +17,13 @@ type TestFixtures = {
 };
 
 export const test = base.extend<TestFixtures>({
-	validUser: async ({ page }, use) => {
+	validUser: async ({ page, registerPage }, use) => {
 		const userData: ValidUser = {
 			firstName: generateRandomName(),
 			lastName: generateRandomSurname(),
 			email: generateRandomEmail(),
 			password: 'password123',
 		};
-
-		const registerPage = createRegisterPage(page);
 
 		await page.goto('/');
 		await registerPage.openUserMenu();

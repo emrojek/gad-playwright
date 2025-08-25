@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { createRegisterPage, RegisterPage } from '../pages/register.page';
+import { test, expect } from '../fixtures/user.fixture';
 import {
 	generateRandomDate,
 	generateRandomName,
@@ -8,12 +7,8 @@ import {
 } from '../helpers/generate-random-data';
 
 test.describe('Registration Form', () => {
-	let registerPage: RegisterPage;
-
-	test.beforeEach(async ({ page }) => {
+	test.beforeEach(async ({ page, registerPage }) => {
 		await page.goto('/');
-
-		registerPage = createRegisterPage(page);
 
 		await registerPage.openUserMenu();
 		await Promise.all([
@@ -24,7 +19,7 @@ test.describe('Registration Form', () => {
 		await expect(page).toHaveURL('/register.html');
 	});
 
-	test('should register successfully', async ({ page }) => {
+	test('should register successfully', async ({ page, registerPage }) => {
 		const alert = registerPage.getAlertPopup();
 		const userData = {
 			firstName: generateRandomName(),
@@ -43,19 +38,20 @@ test.describe('Registration Form', () => {
 
 		await expect(alert).toBeVisible();
 		await expect(alert).toHaveText('User created', { timeout: 15000 });
-
-		await page.waitForURL('/login/');
 		await expect(page).toHaveURL('/login/');
 	});
 
-	test('should show validation errors for empty required fields', async () => {
+	test('should show validation errors for empty required fields', async ({ registerPage }) => {
 		await registerPage.clickRegisterButton();
 
 		const errorsCount = await registerPage.getValidationErrorsCount();
 		expect(errorsCount).toBeGreaterThanOrEqual(4);
 	});
 
-	test('should show error for duplicate email during registration', async ({ page }) => {
+	test('should show error for duplicate email during registration', async ({
+		page,
+		registerPage,
+	}) => {
 		const alert = registerPage.getAlertPopup();
 		const userData = {
 			firstName: generateRandomName(),
@@ -88,7 +84,7 @@ test.describe('Registration Form', () => {
 		await expect(alert).toHaveText('User not created! Email not unique', { timeout: 15000 });
 	});
 
-	test('should display default avatar', async () => {
+	test('should display default avatar', async ({ registerPage }) => {
 		await expect(registerPage.getAvatarDisplay()).toBeVisible();
 
 		const avatarSrc = await registerPage.getCurrentAvatarSrc();
@@ -99,7 +95,7 @@ test.describe('Registration Form', () => {
 		expect(avatarSrc).toContain(selectedAvatarValue);
 	});
 
-	test('should change avatar with different option selected', async () => {
+	test('should change avatar with different option selected', async ({ registerPage }) => {
 		const firstAvatarSrc = await registerPage.getCurrentAvatarSrc();
 		const avatarOptions = await registerPage
 			.getAvatarList()
