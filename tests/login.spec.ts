@@ -16,6 +16,22 @@ test.describe('Login Form', () => {
 			await expect(welcomeMessage).toBeVisible();
 			await expect(welcomeMessage).toContainText(`Hi ${validUser.email}`);
 		});
+
+		test('should logout successfully', async ({ page, validUser, loginPage }) => {
+			const welcomeMessage = loginPage.getWelcomeMessage();
+			const logoutButton = loginPage.getLogoutButton();
+
+			await loginPage.fillLoginForm({
+				email: validUser.email,
+				password: validUser.password,
+			});
+
+			await Promise.all([loginPage.clickFormLoginButton(), page.waitForURL('/welcome')]);
+			await expect(logoutButton).toBeVisible();
+
+			await Promise.all([loginPage.clickPageLogoutButton(), page.waitForURL('/login/')]);
+			await expect(welcomeMessage).not.toBeVisible();
+		});
 	});
 
 	test.describe('Tests without user registration', () => {
@@ -25,7 +41,7 @@ test.describe('Login Form', () => {
 			await loginPage.clickPageLoginButton();
 		});
 
-		test('should show error for invalid credentials', async ( {loginPage }) => {
+		test('should show error for invalid credentials', async ({ loginPage }) => {
 			const welcomeMessage = loginPage.getWelcomeMessage();
 			const errorMessage = loginPage.getFormLoginError();
 
@@ -38,6 +54,15 @@ test.describe('Login Form', () => {
 			await expect(errorMessage).toBeVisible();
 			await expect(errorMessage).toHaveText('Invalid username or password');
 			await expect(welcomeMessage).not.toBeVisible();
+		});
+
+		test('should show validation error for empty fields', async ({ loginPage }) => {
+			const errorMessage = loginPage.getFormLoginError();
+
+			await loginPage.clickFormLoginButton();
+
+			await expect(errorMessage).toBeVisible();
+			await expect(errorMessage).toHaveText('Invalid username or password');
 		});
 	});
 });

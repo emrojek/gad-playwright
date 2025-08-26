@@ -7,6 +7,7 @@ const USER_PASSWORD_INPUT = 'input[id="password"]';
 const FORM_LOGIN_BUTTON = 'input[id="loginButton"]';
 const FORM_LOGIN_ERROR = '[data-testid="login-error"]';
 const PAGE_WELCOME_USER = '[data-testid="hello"]';
+const PAGE_LOGOUT_BUTTON = '[data-testid="logoutButton"]';
 
 export type LoginCredentials = {
 	email?: string;
@@ -16,10 +17,12 @@ export type LoginCredentials = {
 export type LoginPage = {
 	openUserMenu: () => Promise<void>;
 	clickPageLoginButton: () => Promise<void>;
+	clickPageLogoutButton: () => Promise<void>;
 	fillLoginForm: (credentials: LoginCredentials) => Promise<void>;
 	clickFormLoginButton: () => Promise<void>;
 	getFormLoginError: () => Locator;
 	getWelcomeMessage: () => Locator;
+	getLogoutButton: () => Locator;
 };
 
 export const createLoginPage = (page: Page): LoginPage => ({
@@ -29,6 +32,10 @@ export const createLoginPage = (page: Page): LoginPage => ({
 
 	clickPageLoginButton: async () => {
 		await page.click(PAGE_LOGIN_BUTTON);
+	},
+
+	clickPageLogoutButton: async () => {
+		await page.click(PAGE_LOGOUT_BUTTON);
 	},
 
 	fillLoginForm: async (credentials: LoginCredentials) => {
@@ -47,4 +54,6 @@ export const createLoginPage = (page: Page): LoginPage => ({
 	getFormLoginError: () => page.locator(FORM_LOGIN_ERROR),
 
 	getWelcomeMessage: () => page.locator(PAGE_WELCOME_USER),
+
+	getLogoutButton: () => page.locator(PAGE_LOGOUT_BUTTON),
 });
