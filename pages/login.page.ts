@@ -23,6 +23,7 @@ export type LoginPage = {
 	getFormLoginError: () => Locator;
 	getWelcomeMessage: () => Locator;
 	getLogoutButton: () => Locator;
+	getLoginButton: () => Locator;
 };
 
 export const createLoginPage = (page: Page): LoginPage => ({
@@ -56,4 +57,6 @@ export const createLoginPage = (page: Page): LoginPage => ({
 	getWelcomeMessage: () => page.locator(PAGE_WELCOME_USER),
 
 	getLogoutButton: () => page.locator(PAGE_LOGOUT_BUTTON),
+
+	getLoginButton: () => page.locator(FORM_LOGIN_BUTTON),
 });

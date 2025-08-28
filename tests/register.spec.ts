@@ -8,12 +8,13 @@ import {
 
 test.describe('Registration Form', () => {
 	test.beforeEach(async ({ page, registerPage }) => {
-		await page.goto('/');
+		const registerButton = registerPage.getRegisterButton();
 
+		await page.goto('/');
 		await registerPage.openUserMenu();
 		await Promise.all([
 			registerPage.clickPageRegisterButton(),
-			page.waitForURL('/register.html'),
+			expect(registerButton).toBeVisible(),
 		]);
 
 		await expect(page).toHaveURL('/register.html');
@@ -37,7 +38,7 @@ test.describe('Registration Form', () => {
 		]);
 
 		await expect(alert).toBeVisible();
-		await expect(alert).toHaveText('User created', { timeout: 15000 });
+		await expect(alert).toHaveText('User created');
 		await expect(page).toHaveURL('/login/');
 	});
 
@@ -51,8 +52,11 @@ test.describe('Registration Form', () => {
 	test('should show error for duplicate email during registration', async ({
 		page,
 		registerPage,
+		loginPage,
 	}) => {
 		const alert = registerPage.getAlertPopup();
+		const loginButton = loginPage.getLoginButton();
+		const registerButton = registerPage.getRegisterButton();
 		const userData = {
 			firstName: generateRandomName(),
 			lastName: generateRandomSurname(),
@@ -61,27 +65,21 @@ test.describe('Registration Form', () => {
 		};
 
 		await registerPage.fillRegistrationForm(userData);
-		await Promise.all([
-			registerPage.clickRegisterButton(),
-			page.waitForURL('/login/', { waitUntil: 'commit', timeout: 15000 }),
-		]);
-
+		await Promise.all([registerPage.clickRegisterButton(), expect(loginButton).toBeVisible()]);
 		await expect(page).toHaveURL('/login/');
 
 		await page.goto('/');
 		await registerPage.openUserMenu();
-		await Promise.all([
-			registerPage.clickPageRegisterButton(),
-			page.waitForURL('/register.html'),
-		]);
-
+		await registerPage.clickPageRegisterButton();
+		
+		await expect(registerButton).toBeVisible();
 		await expect(page).toHaveURL('/register.html');
 
 		await registerPage.fillRegistrationForm(userData);
 		await registerPage.clickRegisterButton();
 
 		await expect(alert).toBeVisible();
-		await expect(alert).toHaveText('User not created! Email not unique', { timeout: 15000 });
+		await expect(alert).toHaveText('User not created! Email not unique');
 	});
 
 	test('should display default avatar', async ({ registerPage }) => {

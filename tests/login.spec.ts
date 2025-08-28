@@ -4,13 +4,17 @@ test.describe('Login Form', () => {
 	test.describe('Tests requiring valid user', () => {
 		test('should login successfully', async ({ page, validUser, loginPage }) => {
 			const welcomeMessage = loginPage.getWelcomeMessage();
+			const logoutButton = loginPage.getLogoutButton();
 
 			await loginPage.fillLoginForm({
 				email: validUser.email,
 				password: validUser.password,
 			});
 
-			await Promise.all([loginPage.clickFormLoginButton(), page.waitForURL('/welcome')]);
+			await Promise.all([
+				loginPage.clickFormLoginButton(),
+				expect(logoutButton).toBeVisible(),
+			]);
 
 			await expect(page).toHaveURL('/welcome');
 			await expect(welcomeMessage).toBeVisible();
@@ -19,6 +23,7 @@ test.describe('Login Form', () => {
 
 		test('should logout successfully', async ({ page, validUser, loginPage }) => {
 			const welcomeMessage = loginPage.getWelcomeMessage();
+			const loginButton = loginPage.getLoginButton();
 			const logoutButton = loginPage.getLogoutButton();
 
 			await loginPage.fillLoginForm({
@@ -26,10 +31,17 @@ test.describe('Login Form', () => {
 				password: validUser.password,
 			});
 
-			await Promise.all([loginPage.clickFormLoginButton(), page.waitForURL('/welcome')]);
-			await expect(logoutButton).toBeVisible();
+			await Promise.all([
+				loginPage.clickFormLoginButton(),
+				expect(logoutButton).toBeVisible(),
+			]);
 
-			await Promise.all([loginPage.clickPageLogoutButton(), page.waitForURL('/login/')]);
+			await Promise.all([
+				loginPage.clickPageLogoutButton(),
+				expect(loginButton).toBeVisible(),
+			]);
+
+			await expect(page).toHaveURL('/login/');
 			await expect(welcomeMessage).not.toBeVisible();
 		});
 	});

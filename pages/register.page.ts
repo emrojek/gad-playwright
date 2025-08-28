@@ -31,6 +31,7 @@ export type RegisterPage = {
 	getAvatarList: () => Locator;
 	getAvatarDisplay: () => Locator;
 	getAlertPopup: () => Locator;
+	getRegisterButton: () => Locator;
 	getCurrentAvatarSrc: () => Promise<string | null>;
 	clickRegisterButton: () => Promise<void>;
 	getValidationErrorsCount: () => Promise<number>;
@@ -82,6 +83,8 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 	getCurrentAvatarSrc: async () => await page.locator(AVATAR_DISPLAY).getAttribute('src'),
 
 	getAlertPopup: () => page.locator(ALERT_POPUP),
+
+	getRegisterButton: () => page.locator(REGISTER_BUTTON),
 
 	clickRegisterButton: async () => {
 		await page.click(REGISTER_BUTTON);
