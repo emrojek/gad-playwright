@@ -10,53 +10,53 @@ const PAGE_WELCOME_USER = '[data-testid="hello"]';
 const PAGE_LOGOUT_BUTTON = '[data-testid="logoutButton"]';
 
 export type LoginCredentials = {
-	email?: string;
-	password?: string;
+    email?: string;
+    password?: string;
 };
 
 export type LoginPage = {
-	openUserMenu: () => Promise<void>;
-	clickPageLoginButton: () => Promise<void>;
-	clickPageLogoutButton: () => Promise<void>;
-	fillLoginForm: (credentials: LoginCredentials) => Promise<void>;
-	clickFormLoginButton: () => Promise<void>;
-	getFormLoginError: () => Locator;
-	getWelcomeMessage: () => Locator;
-	getLogoutButton: () => Locator;
-	getLoginButton: () => Locator;
+    openUserMenu: () => Promise<void>;
+    clickPageLoginButton: () => Promise<void>;
+    clickPageLogoutButton: () => Promise<void>;
+    fillLoginForm: (credentials: LoginCredentials) => Promise<void>;
+    clickFormLoginButton: () => Promise<void>;
+    getFormLoginError: () => Locator;
+    getWelcomeMessage: () => Locator;
+    getLogoutButton: () => Locator;
+    getLoginButton: () => Locator;
 };
 
 export const createLoginPage = (page: Page): LoginPage => ({
-	openUserMenu: async () => {
-		await page.hover(PAGE_DROPDOWN_BUTTON);
-	},
+    openUserMenu: async () => {
+        await page.hover(PAGE_DROPDOWN_BUTTON);
+    },
 
-	clickPageLoginButton: async () => {
-		await page.click(PAGE_LOGIN_BUTTON);
-	},
+    clickPageLoginButton: async () => {
+        await page.click(PAGE_LOGIN_BUTTON);
+    },
 
-	clickPageLogoutButton: async () => {
-		await page.click(PAGE_LOGOUT_BUTTON);
-	},
+    clickPageLogoutButton: async () => {
+        await page.click(PAGE_LOGOUT_BUTTON);
+    },
 
-	fillLoginForm: async (credentials: LoginCredentials) => {
-		const fillIfExist = async (value: string | undefined, selector: string) => {
-			if (value) await page.fill(selector, value);
-		};
+    fillLoginForm: async (credentials: LoginCredentials) => {
+        const fillIfExist = async (value: string | undefined, selector: string) => {
+            if (value) await page.fill(selector, value);
+        };
 
-		await fillIfExist(credentials.email, USER_EMAIL_INPUT);
-		await fillIfExist(credentials.password, USER_PASSWORD_INPUT);
-	},
+        await fillIfExist(credentials.email, USER_EMAIL_INPUT);
+        await fillIfExist(credentials.password, USER_PASSWORD_INPUT);
+    },
 
-	clickFormLoginButton: async () => {
-		await page.click(FORM_LOGIN_BUTTON);
-	},
+    clickFormLoginButton: async () => {
+        await page.click(FORM_LOGIN_BUTTON);
+    },
 
-	getFormLoginError: () => page.locator(FORM_LOGIN_ERROR),
+    getFormLoginError: () => page.locator(FORM_LOGIN_ERROR),
 
-	getWelcomeMessage: () => page.locator(PAGE_WELCOME_USER),
+    getWelcomeMessage: () => page.locator(PAGE_WELCOME_USER),
 
-	getLogoutButton: () => page.locator(PAGE_LOGOUT_BUTTON),
+    getLogoutButton: () => page.locator(PAGE_LOGOUT_BUTTON),
 
-	getLoginButton: () => page.locator(FORM_LOGIN_BUTTON),
+    getLoginButton: () => page.locator(FORM_LOGIN_BUTTON),
 });

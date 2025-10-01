@@ -1,6 +1,6 @@
-import { test as base } from "@playwright/test";
-import { createRegisterPage, type RegisterPage } from "../pages/register.page";
-import { createLoginPage, type LoginPage } from "../pages/login.page";
+import { test as base } from '@playwright/test';
+import { createRegisterPage, type RegisterPage } from '../pages/register.page';
+import { createLoginPage, type LoginPage } from '../pages/login.page';
 
 type PageFixtures = {
     loginPage: LoginPage;
@@ -14,5 +14,5 @@ export const test = base.extend<PageFixtures>({
 
     registerPage: async ({ page }, use) => {
         await use(createRegisterPage(page));
-    }
-})
+    },
+});
