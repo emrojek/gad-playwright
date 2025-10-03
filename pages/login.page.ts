@@ -6,12 +6,14 @@ const USER_EMAIL_INPUT = 'input[id="username"]';
 const USER_PASSWORD_INPUT = 'input[id="password"]';
 const FORM_LOGIN_BUTTON = 'input[id="loginButton"]';
 const FORM_LOGIN_ERROR = '[data-testid="login-error"]';
+const FORM_KEEP_SIGN_IN_CHECKBOX = 'input[id="keepSignIn"]';
 const PAGE_WELCOME_USER = '[data-testid="hello"]';
 const PAGE_LOGOUT_BUTTON = '[data-testid="logoutButton"]';
 
 export type LoginCredentials = {
     email?: string;
     password?: string;
+    keepSignIn?: boolean;
 };
 
 export type LoginPage = {
@@ -40,12 +42,17 @@ export const createLoginPage = (page: Page): LoginPage => ({
     },
 
     fillLoginForm: async (credentials: LoginCredentials) => {
-        const fillIfExist = async (value: string | undefined, selector: string) => {
-            if (value) await page.fill(selector, value);
-        };
+        if (credentials.email) {
+            await page.fill(USER_EMAIL_INPUT, credentials.email)
+        }
 
-        await fillIfExist(credentials.email, USER_EMAIL_INPUT);
-        await fillIfExist(credentials.password, USER_PASSWORD_INPUT);
+        if (credentials.password) {
+            await page.fill(USER_PASSWORD_INPUT, credentials.password)
+        }
+
+        if (credentials.keepSignIn) {
+            await page.locator(FORM_KEEP_SIGN_IN_CHECKBOX).check();
+        }
     },
 
     clickFormLoginButton: async () => {
