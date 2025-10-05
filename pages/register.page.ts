@@ -47,15 +47,25 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
     },
 
     fillRegistrationForm: async (userData: RegistrationData) => {
-        const fillIfExist = async (value: string | undefined, selector: string) => {
-            if (value) await page.fill(selector, value);
-        };
+        if (userData.firstName) {
+            await page.fill(FIRST_NAME_INPUT, userData.firstName);
+        }
 
-        await fillIfExist(userData.firstName, FIRST_NAME_INPUT);
-        await fillIfExist(userData.lastName, LAST_NAME_INPUT);
-        await fillIfExist(userData.email, EMAIL_INPUT);
-        await fillIfExist(userData.birthDate, BIRTH_DATE_INPUT);
-        await fillIfExist(userData.password, PASSWORD_INPUT);
+        if (userData.lastName) {
+            await page.fill(LAST_NAME_INPUT, userData.lastName);
+        }
+
+        if (userData.email) {
+            await page.fill(EMAIL_INPUT, userData.email);
+        }
+
+        if (userData.birthDate) {
+            await page.fill(BIRTH_DATE_INPUT, userData.birthDate);
+        }
+
+        if (userData.password) {
+            await page.fill(PASSWORD_INPUT, userData.password);
+        }
     },
 
     clickDatepickerDoneButton: async () => {
