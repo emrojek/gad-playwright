@@ -1,10 +1,27 @@
 import { faker } from '@faker-js/faker';
 
-export const generateRandomEmail = (): string => faker.internet.email();
+export type RandomUserData = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    birthDate: string;
+};
 
-export const generateRandomName = (): string => faker.person.firstName();
+export const generateRandomUserData = (): RandomUserData => {
+    const firstName = faker.person.firstName().replace(/[^a-zA-Z]/g, '');
+    const lastName = faker.person.lastName().replace(/[^a-zA-Z]/g, '');
 
-export const generateRandomSurname = (): string => faker.person.lastName();
+    const email = faker.internet.email({ firstName: firstName, lastName: lastName });
 
-export const generateRandomDate = (): string =>
-    faker.date.birthdate({ min: 1970, max: 2005, mode: 'year' }).toISOString().split('T')[0];
+    const birthDate = faker.date
+        .birthdate({ min: 1970, max: 2005, mode: 'year' })
+        .toISOString()
+        .split('T')[0];
+
+    return {
+        firstName,
+        lastName,
+        email,
+        birthDate,
+    };
+};
