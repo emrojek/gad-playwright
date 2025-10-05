@@ -1,10 +1,6 @@
 import { test as base } from './pages.fixture';
 import { expect } from '@playwright/test';
-import {
-    generateRandomEmail,
-    generateRandomName,
-    generateRandomSurname,
-} from '../helpers/generate-random-data';
+import { generateRandomUserData } from '../helpers/generate-random-data';
 
 export type ValidUser = {
     firstName: string;
@@ -19,12 +15,15 @@ type TestFixtures = {
 
 export const test = base.extend<TestFixtures>({
     validUser: async ({ page, registerPage, loginPage }, use) => {
+        const { firstName, lastName, email } = generateRandomUserData();
+
         const userData: ValidUser = {
-            firstName: generateRandomName(),
-            lastName: generateRandomSurname(),
-            email: generateRandomEmail(),
+            firstName,
+            lastName,
+            email,
             password: 'password123',
         };
+
         const loginButton = loginPage.getLoginButton();
 
         await page.goto('/');

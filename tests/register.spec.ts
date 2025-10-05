@@ -1,10 +1,5 @@
 import { test, expect } from '../fixtures/user.fixture';
-import {
-    generateRandomDate,
-    generateRandomName,
-    generateRandomSurname,
-    generateRandomEmail,
-} from '../helpers/generate-random-data';
+import { generateRandomUserData } from '../helpers/generate-random-data';
 
 test.describe('Registration Form', () => {
     test.beforeEach(async ({ page, registerPage }) => {
@@ -21,12 +16,14 @@ test.describe('Registration Form', () => {
     });
 
     test('should register successfully', async ({ page, registerPage }) => {
+        const { firstName, lastName, email, birthDate } = generateRandomUserData();
         const alert = registerPage.getAlertPopup();
+
         const userData = {
-            firstName: generateRandomName(),
-            lastName: generateRandomSurname(),
-            email: generateRandomEmail(),
-            birthDate: generateRandomDate(),
+            firstName,
+            lastName,
+            email,
+            birthDate,
             password: 'password123',
         };
 
@@ -54,13 +51,15 @@ test.describe('Registration Form', () => {
         registerPage,
         loginPage,
     }) => {
+        const { firstName, lastName, email } = generateRandomUserData();
         const alert = registerPage.getAlertPopup();
         const loginButton = loginPage.getLoginButton();
         const registerButton = registerPage.getRegisterButton();
+
         const userData = {
-            firstName: generateRandomName(),
-            lastName: generateRandomSurname(),
-            email: generateRandomEmail(),
+            firstName,
+            lastName,
+            email,
             password: 'password123',
         };
 
