@@ -18,6 +18,8 @@ test.describe('Registration Form', () => {
     test('should register successfully', async ({ page, registerPage }) => {
         const { firstName, lastName, email, birthDate } = generateRandomUserData();
         const alert = registerPage.getAlertPopup();
+        const firstNameError = registerPage.getFirstNameError();
+        const lastNameError = registerPage.getLastNameError();
 
         const userData = {
             firstName,
@@ -28,6 +30,10 @@ test.describe('Registration Form', () => {
         };
 
         await registerPage.fillRegistrationForm(userData);
+
+        await expect(firstNameError).toBeHidden();
+        await expect(lastNameError).toBeHidden();
+
         await registerPage.clickDatepickerDoneButton();
         await Promise.all([
             registerPage.clickRegisterButton(),
@@ -112,5 +118,25 @@ test.describe('Registration Form', () => {
 
             expect(updatedAvatarSrc).not.toBe(firstAvatarSrc);
         }
+    });
+
+    test('should show validation error for non-letter characters in name fields', async ({
+        registerPage,
+    }) => {
+        const firstNameError = registerPage.getFirstNameError();
+        const lastNameError = registerPage.getLastNameError();
+        const userData = {
+            firstName: 'John123',
+            lastName: 'Doe-!@',
+        };
+
+        await registerPage.fillRegistrationForm(userData);
+        await registerPage.clickRegisterButton();
+
+        await expect(firstNameError).toBeVisible();
+        await expect(firstNameError).toHaveText('Please enter only Letters!')
+
+        await expect(lastNameError).toBeVisible();
+        await expect(lastNameError).toHaveText('Please enter only letter.')
     });
 });

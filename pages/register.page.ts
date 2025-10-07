@@ -2,8 +2,8 @@ import { Page, Locator } from '@playwright/test';
 
 const PAGE_DROPDOWN_BUTTON = '[data-testid="btn-dropdown"]';
 const PAGE_REGISTER_BUTTON = '[id="registerBtn"]';
-const FIRST_NAME_INPUT = '[data-testid="firstname-input"]';
-const LAST_NAME_INPUT = '[data-testid="lastname-input"]';
+const FIRSTNAME_INPUT = '[data-testid="firstname-input"]';
+const LASTNAME_INPUT = '[data-testid="lastname-input"]';
 const EMAIL_INPUT = '[data-testid="email-input"]';
 const BIRTH_DATE_INPUT = '[data-testid="birthdate-input"]';
 const DATEPICKER_DONE_BUTTON = '.ui-datepicker-close';
@@ -12,6 +12,8 @@ const AVATAR_DISPLAY = '[id="userPicture"]';
 const AVATAR_LIST = 'select[id="avatar"]';
 const REGISTER_BUTTON = '[data-testid="register-button"]';
 const ALERT_POPUP = '[data-testid="alert-popup"]';
+const FIRSTNAME_INPUT_ERROR = '[id="octavalidate_firstname"]';
+const LASTNAME_INPUT_ERROR = '[id="octavalidate_lastname"]';
 
 export type RegistrationData = {
     firstName?: string;
@@ -35,6 +37,8 @@ export type RegisterPage = {
     getCurrentAvatarSrc: () => Promise<string | null>;
     clickRegisterButton: () => Promise<void>;
     getValidationErrorsCount: () => Promise<number>;
+    getFirstNameError: () => Locator;
+    getLastNameError: () => Locator;
 };
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
@@ -48,11 +52,11 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 
     fillRegistrationForm: async (userData: RegistrationData) => {
         if (userData.firstName) {
-            await page.fill(FIRST_NAME_INPUT, userData.firstName);
+            await page.fill(FIRSTNAME_INPUT, userData.firstName);
         }
 
         if (userData.lastName) {
-            await page.fill(LAST_NAME_INPUT, userData.lastName);
+            await page.fill(LASTNAME_INPUT, userData.lastName);
         }
 
         if (userData.email) {
@@ -104,4 +108,8 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
         const errorSelector = '[id*="octavalidate_"]';
         return await page.locator(errorSelector).count();
     },
+
+    getFirstNameError: () => page.locator(FIRSTNAME_INPUT_ERROR),
+
+    getLastNameError: () => page.locator(LASTNAME_INPUT_ERROR),
 });
