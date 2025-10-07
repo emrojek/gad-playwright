@@ -134,9 +134,38 @@ test.describe('Registration Form', () => {
         await registerPage.clickRegisterButton();
 
         await expect(firstNameError).toBeVisible();
-        await expect(firstNameError).toHaveText('Please enter only Letters!')
+        await expect(firstNameError).toHaveText('Please enter only Letters!');
 
         await expect(lastNameError).toBeVisible();
-        await expect(lastNameError).toHaveText('Please enter only letter.')
+        await expect(lastNameError).toHaveText('Please enter only letter.');
+    });
+
+    test('should show validation error for password with only whitespaces', async ({
+        registerPage,
+    }) => {
+        const passwordError = registerPage.getPasswordError();
+        const userPassword = {
+            password: '    ',
+        };
+
+        await registerPage.fillRegistrationForm(userPassword);
+        await registerPage.clickRegisterButton();
+
+        await expect(passwordError).toBeVisible();
+        await expect(passwordError).toHaveText('This field is required');
+    });
+
+    test('should pass a weak password, indicating no strength validation', async ({
+        registerPage,
+    }) => {
+        const passwordInput = registerPage.getPasswordInput();
+        const userPassword = {
+            password: '123',
+        };
+
+        await registerPage.fillRegistrationForm(userPassword);
+        await registerPage.clickRegisterButton();
+
+        await expect(passwordInput).not.toHaveClass(/error/);
     });
 });

@@ -14,6 +14,7 @@ const REGISTER_BUTTON = '[data-testid="register-button"]';
 const ALERT_POPUP = '[data-testid="alert-popup"]';
 const FIRSTNAME_INPUT_ERROR = '[id="octavalidate_firstname"]';
 const LASTNAME_INPUT_ERROR = '[id="octavalidate_lastname"]';
+const PASSWORD_INPUT_ERROR = '[id="octavalidate_password"]';
 
 export type RegistrationData = {
     firstName?: string;
@@ -39,6 +40,8 @@ export type RegisterPage = {
     getValidationErrorsCount: () => Promise<number>;
     getFirstNameError: () => Locator;
     getLastNameError: () => Locator;
+    getPasswordError: () => Locator;
+    getPasswordInput: () => Locator;
 };
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
@@ -112,4 +115,8 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
     getFirstNameError: () => page.locator(FIRSTNAME_INPUT_ERROR),
 
     getLastNameError: () => page.locator(LASTNAME_INPUT_ERROR),
+
+    getPasswordError: () => page.locator(PASSWORD_INPUT_ERROR),
+
+    getPasswordInput: () => page.locator(PASSWORD_INPUT),
 });
