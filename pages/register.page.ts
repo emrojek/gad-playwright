@@ -16,6 +16,10 @@ const FIRSTNAME_INPUT_ERROR = '[id="octavalidate_firstname"]';
 const LASTNAME_INPUT_ERROR = '[id="octavalidate_lastname"]';
 const PASSWORD_INPUT_ERROR = '[id="octavalidate_password"]';
 const DATEPICKER = '[id="ui-datepicker-div"]';
+const DATEPICKER_NEXT_BUTTON = '[data-handler="next"]';
+const DATEPICKER_PREV_BUTTON = '[data-handler="prev"]';
+const DATEPICKER_CURRENT_MONTH = '.ui-datepicker-month';
+const DATEPICKER_CURRENT_YEAR = '.ui-datepicker-year';
 
 export type RegistrationData = {
     firstName?: string;
@@ -45,6 +49,12 @@ export type RegisterPage = {
     getPasswordInput: () => Locator;
     getDatepicker: () => Locator;
     clickBirthDateInput: () => Promise<void>;
+    clickDatePickerNext: () => Promise<void>;
+    clickDatePickerPrev: () => Promise<void>;
+    selectDayFromDatepicker: (day: string) => Promise<void>;
+    getDatePickerMonth: () => Locator;
+    getDatePickerYear: () => Locator;
+    getBirthDateInput: () => Locator;
 };
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
@@ -128,4 +138,22 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
     clickBirthDateInput: async () => {
         await page.click(BIRTH_DATE_INPUT);
     },
+
+    clickDatePickerNext: async () => {
+        await page.click(DATEPICKER_NEXT_BUTTON);
+    },
+
+    clickDatePickerPrev: async () => {
+        await page.click(DATEPICKER_PREV_BUTTON);
+    },
+
+    selectDayFromDatepicker: async (day: string) => {
+        await page.getByRole('link', { name: day }).click();
+    },
+
+    getDatePickerMonth: () => page.locator(DATEPICKER_CURRENT_MONTH),
+
+    getDatePickerYear: () => page.locator(DATEPICKER_CURRENT_YEAR),
+
+    getBirthDateInput: () => page.locator(BIRTH_DATE_INPUT),
 });

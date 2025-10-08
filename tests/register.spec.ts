@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures/user.fixture';
 import { generateRandomUserData } from '../helpers/generate-random-data';
+import { convertMonthNameToNumber } from '../helpers/date-helpers';
 
 test.describe('Registration Form', () => {
     test.beforeEach(async ({ page, registerPage }) => {
@@ -178,5 +179,31 @@ test.describe('Registration Form', () => {
 
         await registerPage.clickDatepickerDoneButton();
         await expect(datepicker).toBeHidden();
+    });
+
+    test('should allow changing month and selecting a date in the datepicker', async ({
+        registerPage,
+    }) => {
+        const setDatepickerDay = '15';
+        const birthDateField = registerPage.getBirthDateInput();
+
+        await registerPage.clickBirthDateInput();
+        await registerPage.clickDatePickerNext();
+
+        const monthName = await registerPage.getDatePickerMonth().textContent();
+        const year = await registerPage.getDatePickerYear().textContent();
+
+        if (!monthName || !year) {
+            throw new Error('Could not read year or month from the datepicker.');
+        }
+
+        await registerPage.selectDayFromDatepicker(setDatepickerDay);
+        await registerPage.clickDatepickerDoneButton();
+
+        const monthNumber = convertMonthNameToNumber(monthName);
+        const expectedDate = `${year}-${monthNumber}-${setDatepickerDay}`;
+
+        await expect(birthDateField).not.toBeEmpty();
+        await expect(birthDateField).toHaveValue(expectedDate);
     });
 });
