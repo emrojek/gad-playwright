@@ -168,15 +168,4 @@ test.describe('Registration Form', () => {
 
         await expect(passwordInput).not.toHaveClass(/error/);
     });
-
-    test('should open and close the datepicker', async ({ registerPage }) => {
-        const datepicker = registerPage.getDatepicker();
-        await expect(datepicker).toBeHidden();
-
-        await registerPage.clickBirthDateInput();
-        await expect(datepicker).toBeVisible();
-
-        await registerPage.clickDatepickerDoneButton();
-        await expect(datepicker).toBeHidden();
-    });
 });

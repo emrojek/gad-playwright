@@ -6,7 +6,7 @@ const FIRSTNAME_INPUT = '[data-testid="firstname-input"]';
 const LASTNAME_INPUT = '[data-testid="lastname-input"]';
 const EMAIL_INPUT = '[data-testid="email-input"]';
 const BIRTH_DATE_INPUT = '[data-testid="birthdate-input"]';
-const DATEPICKER_DONE_BUTTON = '[data-handler="hide"]';
+const DATEPICKER_DONE_BUTTON = '.ui-datepicker-close';
 const PASSWORD_INPUT = '[data-testid="password-input"]';
 const AVATAR_DISPLAY = '[id="userPicture"]';
 const AVATAR_LIST = 'select[id="avatar"]';
@@ -15,7 +15,6 @@ const ALERT_POPUP = '[data-testid="alert-popup"]';
 const FIRSTNAME_INPUT_ERROR = '[id="octavalidate_firstname"]';
 const LASTNAME_INPUT_ERROR = '[id="octavalidate_lastname"]';
 const PASSWORD_INPUT_ERROR = '[id="octavalidate_password"]';
-const DATEPICKER = '[id="ui-datepicker-div"]';
 
 export type RegistrationData = {
     firstName?: string;
@@ -43,8 +42,6 @@ export type RegisterPage = {
     getLastNameError: () => Locator;
     getPasswordError: () => Locator;
     getPasswordInput: () => Locator;
-    getDatepicker: () => Locator;
-    clickBirthDateInput: () => Promise<void>;
 };
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
@@ -122,10 +119,4 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
     getPasswordError: () => page.locator(PASSWORD_INPUT_ERROR),
 
     getPasswordInput: () => page.locator(PASSWORD_INPUT),
-
-    getDatepicker: () => page.locator(DATEPICKER),
-
-    clickBirthDateInput: async () => {
-        await page.click(BIRTH_DATE_INPUT);
-    },
 });
