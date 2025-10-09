@@ -1,15 +1,5 @@
 import { Page, Locator } from '@playwright/test';
 
-const PAGE_DROPDOWN_BUTTON = '[data-testid="btn-dropdown"]';
-const PAGE_LOGIN_BUTTON = '[id="loginBtn"]';
-const USER_EMAIL_INPUT = 'input[id="username"]';
-const USER_PASSWORD_INPUT = 'input[id="password"]';
-const FORM_LOGIN_BUTTON = 'input[id="loginButton"]';
-const FORM_LOGIN_ERROR = '[data-testid="login-error"]';
-const FORM_KEEP_SIGN_IN_CHECKBOX = 'input[id="keepSignIn"]';
-const PAGE_WELCOME_USER = '[data-testid="hello"]';
-const PAGE_LOGOUT_BUTTON = '[data-testid="logoutButton"]';
-
 export type LoginCredentials = {
     email?: string;
     password?: string;
@@ -30,40 +20,40 @@ export type LoginPage = {
 
 export const createLoginPage = (page: Page): LoginPage => ({
     openUserMenu: async () => {
-        await page.hover(PAGE_DROPDOWN_BUTTON);
+        await page.getByTestId('btn-dropdown').hover();
     },
 
     clickPageLoginButton: async () => {
-        await page.click(PAGE_LOGIN_BUTTON);
+        await page.getByRole('link', { name: 'Login' }).click();
     },
 
     clickPageLogoutButton: async () => {
-        await page.click(PAGE_LOGOUT_BUTTON);
+        await page.getByTestId('logoutButton').click();
     },
 
     fillLoginForm: async (credentials: LoginCredentials) => {
         if (credentials.email) {
-            await page.fill(USER_EMAIL_INPUT, credentials.email)
+            await page.getByPlaceholder('Enter User Email').fill(credentials.email);
         }
 
         if (credentials.password) {
-            await page.fill(USER_PASSWORD_INPUT, credentials.password)
+            await page.getByPlaceholder('Enter Password').fill(credentials.password);
         }
 
         if (credentials.keepSignIn) {
-            await page.locator(FORM_KEEP_SIGN_IN_CHECKBOX).check();
+            await page.getByRole('checkbox', { name: 'keep me sign in' }).check();
         }
     },
 
     clickFormLoginButton: async () => {
-        await page.click(FORM_LOGIN_BUTTON);
+        await page.getByRole('button', { name: 'Login' }).click();
     },
 
-    getFormLoginError: () => page.locator(FORM_LOGIN_ERROR),
+    getFormLoginError: () => page.getByTestId('login-error'),
 
-    getWelcomeMessage: () => page.locator(PAGE_WELCOME_USER),
+    getWelcomeMessage: () => page.getByTestId('hello'),
 
-    getLogoutButton: () => page.locator(PAGE_LOGOUT_BUTTON),
+    getLogoutButton: () => page.getByTestId('logoutButton'),
 
-    getLoginButton: () => page.locator(FORM_LOGIN_BUTTON),
+    getLoginButton: () => page.getByRole('button', { name: 'Login' }),
 });
