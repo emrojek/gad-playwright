@@ -8,11 +8,9 @@ test.describe('Registration Form', () => {
 
         await page.goto('/');
         await registerPage.openUserMenu();
-        await Promise.all([
-            registerPage.clickPageRegisterButton(),
-            expect(registerButton).toBeVisible(),
-        ]);
+        await registerPage.clickPageRegisterButton();
 
+        await expect(registerButton).toBeVisible();
         await expect(page).toHaveURL('/register.html');
     });
 
@@ -36,10 +34,8 @@ test.describe('Registration Form', () => {
         await expect(lastNameError).toBeHidden();
 
         await registerPage.clickDatepickerDoneButton();
-        await Promise.all([
-            registerPage.clickRegisterButton(),
-            alert.waitFor({ state: 'visible' }),
-        ]);
+        await registerPage.clickRegisterButton();
+        await alert.waitFor({ state: 'visible' });
 
         await expect(alert).toBeVisible();
         await expect(alert).toHaveText('User created');
@@ -71,7 +67,9 @@ test.describe('Registration Form', () => {
         };
 
         await registerPage.fillRegistrationForm(userData);
-        await Promise.all([registerPage.clickRegisterButton(), expect(loginButton).toBeVisible()]);
+        await registerPage.clickRegisterButton();
+
+        await expect(loginButton).toBeVisible();
         await expect(page).toHaveURL('/login/');
 
         await page.goto('/');

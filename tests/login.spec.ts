@@ -12,10 +12,8 @@ test.describe('Login Form', () => {
                 password: validUser.password,
             });
 
-            await Promise.all([
-                loginPage.clickFormLoginButton(),
-                expect(logoutButton).toBeVisible(),
-            ]);
+            await loginPage.clickFormLoginButton();
+            await expect(logoutButton).toBeVisible();
 
             await expect(page).toHaveURL('/welcome');
             await expect(welcomeMessage).toBeVisible();
@@ -32,15 +30,11 @@ test.describe('Login Form', () => {
                 password: validUser.password,
             });
 
-            await Promise.all([
-                loginPage.clickFormLoginButton(),
-                expect(logoutButton).toBeVisible(),
-            ]);
+            await loginPage.clickFormLoginButton();
+            await expect(logoutButton).toBeVisible();
 
-            await Promise.all([
-                loginPage.clickPageLogoutButton(),
-                expect(loginButton).toBeVisible(),
-            ]);
+            await loginPage.clickPageLogoutButton();
+            await expect(loginButton).toBeVisible();
 
             await expect(page).toHaveURL('/login/');
             await expect(welcomeMessage).not.toBeVisible();
@@ -62,10 +56,8 @@ test.describe('Login Form', () => {
                     keepSignIn: true,
                 });
 
-                await Promise.all([
-                    loginPage.clickFormLoginButton(),
-                    expect(logoutButton).toBeVisible(),
-                ]);
+                await loginPage.clickFormLoginButton();
+                await expect(logoutButton).toBeVisible();
 
                 await page.context().storageState({ path: storageStatePath });
                 expect(fs.existsSync(storageStatePath)).toBeTruthy();
