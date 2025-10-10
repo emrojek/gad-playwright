@@ -1,5 +1,4 @@
 import { test, expect } from '../fixtures/user.fixture';
-import * as fs from 'fs';
 
 test.describe('Login Form', () => {
     test.describe('Tests requiring valid user', () => {
@@ -47,37 +46,29 @@ test.describe('Login Form', () => {
             loginPage,
         }) => {
             const logoutButton = loginPage.getLogoutButton();
-            const storageStatePath = 'playwright/.auth/user-session.json';
 
-            try {
-                await loginPage.fillLoginForm({
-                    email: validUser.email,
-                    password: validUser.password,
-                    keepSignIn: true,
-                });
+            await loginPage.fillLoginForm({
+                email: validUser.email,
+                password: validUser.password,
+                keepSignIn: true,
+            });
 
-                await loginPage.clickFormLoginButton();
-                await expect(logoutButton).toBeVisible();
+            await loginPage.clickFormLoginButton();
+            await expect(logoutButton).toBeVisible();
 
-                await page.context().storageState({ path: storageStatePath });
-                expect(fs.existsSync(storageStatePath)).toBeTruthy();
+            const storageState = await page.context().storageState();
 
-                const newContext = await browser.newContext({ storageState: storageStatePath });
-                const newPage = await newContext.newPage();
-                await newPage.goto('/');
+            const newContext = await browser.newContext({ storageState: storageState });
+            const newPage = await newContext.newPage();
+            await newPage.goto('/');
 
-                const newDropdownMenu = newPage.locator('[data-testid="btn-dropdown"]');
-                const newPageLogoutButton = newPage.locator('[id="logoutBtn"]');
-                const newUserWelcome = newPage.locator('[id="username"]');
+            const newDropdownMenu = newPage.getByTestId('btn-dropdown');
+            const newPageLogoutButton = newPage.getByRole('link', { name: 'Logout' });
+            const newUserWelcome = newPage.getByText(`Hello ${validUser.firstName}`);
 
-                await newDropdownMenu.hover();
-                await expect(newPageLogoutButton).toBeVisible();
-                await expect(newUserWelcome).toContainText(`Hello ${validUser.firstName}`);
-            } finally {
-                if (fs.existsSync(storageStatePath)) {
-                    fs.unlinkSync(storageStatePath);
-                }
-            }
+            await newDropdownMenu.hover();
+            await expect(newPageLogoutButton).toBeVisible();
+            await expect(newUserWelcome).toContainText(`Hello ${validUser.firstName}`);
         });
     });
 
