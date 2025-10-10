@@ -1,26 +1,5 @@
 import { Page, Locator } from '@playwright/test';
 
-const PAGE_DROPDOWN_BUTTON = '[data-testid="btn-dropdown"]';
-const PAGE_REGISTER_BUTTON = '[id="registerBtn"]';
-const FIRSTNAME_INPUT = '[data-testid="firstname-input"]';
-const LASTNAME_INPUT = '[data-testid="lastname-input"]';
-const EMAIL_INPUT = '[data-testid="email-input"]';
-const BIRTH_DATE_INPUT = '[data-testid="birthdate-input"]';
-const DATEPICKER_DONE_BUTTON = '[data-handler="hide"]';
-const PASSWORD_INPUT = '[data-testid="password-input"]';
-const AVATAR_DISPLAY = '[id="userPicture"]';
-const AVATAR_LIST = 'select[id="avatar"]';
-const REGISTER_BUTTON = '[data-testid="register-button"]';
-const ALERT_POPUP = '[data-testid="alert-popup"]';
-const FIRSTNAME_INPUT_ERROR = '[id="octavalidate_firstname"]';
-const LASTNAME_INPUT_ERROR = '[id="octavalidate_lastname"]';
-const PASSWORD_INPUT_ERROR = '[id="octavalidate_password"]';
-const DATEPICKER = '[id="ui-datepicker-div"]';
-const DATEPICKER_NEXT_BUTTON = '[data-handler="next"]';
-const DATEPICKER_PREV_BUTTON = '[data-handler="prev"]';
-const DATEPICKER_CURRENT_MONTH = '.ui-datepicker-month';
-const DATEPICKER_CURRENT_YEAR = '.ui-datepicker-year';
-
 export type RegistrationData = {
     firstName?: string;
     lastName?: string;
@@ -59,101 +38,109 @@ export type RegisterPage = {
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
     openUserMenu: async () => {
-        await page.hover(PAGE_DROPDOWN_BUTTON);
+        await page.getByTestId('btn-dropdown').hover();
     },
 
     clickPageRegisterButton: async () => {
-        await page.click(PAGE_REGISTER_BUTTON);
+        await page.getByRole('link', { name: 'Register' }).click();
     },
 
     fillRegistrationForm: async (userData: RegistrationData) => {
         if (userData.firstName) {
-            await page.fill(FIRSTNAME_INPUT, userData.firstName);
+            await page.getByTestId('firstname-input').fill(userData.firstName);
         }
 
         if (userData.lastName) {
-            await page.fill(LASTNAME_INPUT, userData.lastName);
+            await page.getByTestId('lastname-input').fill(userData.lastName);
         }
 
         if (userData.email) {
-            await page.fill(EMAIL_INPUT, userData.email);
+            await page.getByTestId('email-input').fill(userData.email);
         }
 
         if (userData.birthDate) {
-            await page.fill(BIRTH_DATE_INPUT, userData.birthDate);
+            await page.getByTestId('birthdate-input').fill(userData.birthDate);
         }
 
         if (userData.password) {
-            await page.fill(PASSWORD_INPUT, userData.password);
+            await page.getByTestId('password-input').fill(userData.password);
         }
     },
 
     clickDatepickerDoneButton: async () => {
-        await page.click(DATEPICKER_DONE_BUTTON);
+        await page.getByRole('button', { name: 'Done' }).click();
     },
 
     selectAvatar: async (avatarName?: string) => {
+        const avatarDropdown = page.getByRole('combobox');
+
         if (avatarName) {
-            await page.selectOption(AVATAR_LIST, avatarName);
+            await avatarDropdown.selectOption(avatarName);
         } else {
-            const firstOption = await page
-                .locator(`${AVATAR_LIST} option`)
+            const firstOption = await avatarDropdown
+                .locator(`option`)
                 .first()
                 .getAttribute('value');
             if (firstOption) {
-                await page.selectOption(AVATAR_LIST, firstOption);
+                await avatarDropdown.selectOption(firstOption);
             }
         }
     },
 
-    getAvatarList: () => page.locator(AVATAR_LIST),
+    getAvatarList: () => page.getByRole('combobox'),
 
-    getAvatarDisplay: () => page.locator(AVATAR_DISPLAY),
+    getAvatarDisplay: () => page.locator('#userPicture'),
 
-    getCurrentAvatarSrc: async () => await page.locator(AVATAR_DISPLAY).getAttribute('src'),
+    getCurrentAvatarSrc: async () => await page.locator('#userPicture').getAttribute('src'),
 
-    getAlertPopup: () => page.locator(ALERT_POPUP),
+    getAlertPopup: () => page.getByTestId('alert-popup'),
 
-    getRegisterButton: () => page.locator(REGISTER_BUTTON),
+    getRegisterButton: () => page.getByRole('button', { name: 'Register' }),
 
     clickRegisterButton: async () => {
-        await page.click(REGISTER_BUTTON);
+        await page.getByRole('button', { name: 'Register' }).click();
     },
 
-    getValidationErrorsCount: async () => {
-        const errorSelector = '[id*="octavalidate_"]';
-        return await page.locator(errorSelector).count();
-    },
+    getValidationErrorsCount: async () => await page.locator('p.octavalidate-txt-error').count(),
 
-    getFirstNameError: () => page.locator(FIRSTNAME_INPUT_ERROR),
+    getFirstNameError: () =>
+        page
+            .locator('div.input-field:has([data-testid="firstname-input"])')
+            .locator('p.octavalidate-txt-error'),
 
-    getLastNameError: () => page.locator(LASTNAME_INPUT_ERROR),
+    getLastNameError: () =>
+        page
+            .locator('div.input-field:has([data-testid="lastname-input"])')
+            .locator('p.octavalidate-txt-error'),
 
-    getPasswordError: () => page.locator(PASSWORD_INPUT_ERROR),
+    getPasswordError: () =>
+        page
+            .locator('div.input-field:has([data-testid="password-input"])')
+            .locator('p.octavalidate-txt-error'),
 
-    getPasswordInput: () => page.locator(PASSWORD_INPUT),
+    getPasswordInput: () => page.getByTestId('password-input'),
 
-    getDatepicker: () => page.locator(DATEPICKER),
+    getDatepicker: () => page.locator('#ui-datepicker-div'),
 
     clickBirthDateInput: async () => {
-        await page.click(BIRTH_DATE_INPUT);
+        await page.getByTestId('birthdate-input').click();
     },
 
     clickDatePickerNext: async () => {
-        await page.click(DATEPICKER_NEXT_BUTTON);
+        await page.getByTitle('>').click();
     },
 
     clickDatePickerPrev: async () => {
-        await page.click(DATEPICKER_PREV_BUTTON);
+        await page.getByTitle('<').click();
     },
 
     selectDayFromDatepicker: async (day: string) => {
         await page.getByRole('link', { name: day }).click();
     },
 
-    getDatePickerMonth: () => page.locator(DATEPICKER_CURRENT_MONTH),
+    getDatePickerMonth: () => page.locator('span.ui-datepicker-month'),
 
-    getDatePickerYear: () => page.locator(DATEPICKER_CURRENT_YEAR),
+    getDatePickerYear: () => page.locator('span.ui-datepicker-year'),
 
-    getBirthDateInput: () => page.locator(BIRTH_DATE_INPUT),
+    getBirthDateInput: () => page.getByTestId('birthdate-input'),
 });
