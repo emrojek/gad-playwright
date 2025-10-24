@@ -6,8 +6,8 @@ Project has been created for educational purposes to improve skills of automatio
 
 ## 🛠️ Tech stack
 
-- Playwright v1.54.1
-- TypeScript v24.1.0
-- NodeJS v20.16.0
+-   Playwright v1.54.1
+-   TypeScript v24.1.0
+-   NodeJS v20.16.0
 
 ... more description coming soon.
