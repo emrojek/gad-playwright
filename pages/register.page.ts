@@ -78,12 +78,15 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
             await avatarDropdown.selectOption(avatarName);
         } else {
             const firstOption = await avatarDropdown
-                .locator(`option`)
+                .locator('option')
                 .first()
                 .getAttribute('value');
-            if (firstOption) {
-                await avatarDropdown.selectOption(firstOption);
+
+            if (firstOption === null) {
+                throw new Error('No avatar options available to select.');
             }
+
+            await avatarDropdown.selectOption(firstOption);
         }
     },
 

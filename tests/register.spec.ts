@@ -1,6 +1,7 @@
 import { test, expect } from '../fixtures/user.fixture';
 import { generateRandomUserData } from '../helpers/generate-random-data';
 import { convertMonthNameToNumber } from '../helpers/date-helpers';
+import { TEST_PASSWORDS } from '../helpers/test-constants';
 
 test.describe('Registration Form', () => {
     test.beforeEach(async ({ page, registerPage }) => {
@@ -25,7 +26,7 @@ test.describe('Registration Form', () => {
             lastName,
             email,
             birthDate,
-            password: 'password123',
+            password: TEST_PASSWORDS.valid,
         };
 
         await registerPage.fillRegistrationForm(userData);
@@ -63,7 +64,7 @@ test.describe('Registration Form', () => {
             firstName,
             lastName,
             email,
-            password: 'password123',
+            password: TEST_PASSWORDS.valid,
         };
 
         await registerPage.fillRegistrationForm(userData);
@@ -144,7 +145,7 @@ test.describe('Registration Form', () => {
     }) => {
         const passwordError = registerPage.getPasswordError();
         const userPassword = {
-            password: '    ',
+            password: TEST_PASSWORDS.spaces,
         };
 
         await registerPage.fillRegistrationForm(userPassword);
@@ -159,7 +160,7 @@ test.describe('Registration Form', () => {
     }) => {
         const passwordInput = registerPage.getPasswordInput();
         const userPassword = {
-            password: '123',
+            password: TEST_PASSWORDS.weak,
         };
 
         await registerPage.fillRegistrationForm(userPassword);
