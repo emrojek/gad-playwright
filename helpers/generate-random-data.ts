@@ -16,7 +16,7 @@ export const generateRandomUserData = (): RandomUserData => {
     const birthDate = faker.date
         .birthdate({ min: 1970, max: 2005, mode: 'year' })
         .toISOString()
-        .split('T')[0];
+        .split('T')[0] ?? '1990-01-01';
 
     return {
         firstName,
