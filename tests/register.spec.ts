@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/user.fixture';
 import { generateRandomUserData } from '../helpers/generate-random-data';
-import { convertMonthNameToNumber } from '../helpers/date-helpers';
+import { convertMonthNameToNumber, getCurrentDate, getFutureDate, getPastDate } from '../helpers/date-helpers';
 import { TEST_PASSWORDS } from '../helpers/test-constants';
 
 test.describe('Registration Form', () => {
@@ -185,5 +185,91 @@ test.describe('Registration Form', () => {
 
 		await expect(birthDateField).not.toBeEmpty();
 		await expect(birthDateField).toHaveValue(expectedDate);
+	});
+
+	test('should display current month in datepicker', async ({ registerPage }) => {
+		const currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
+
+		await registerPage.clickBirthDateInput();
+
+		const displayedMonth = await registerPage.getDatePickerMonth().textContent();
+
+		expect(displayedMonth).toBe(currentMonth);
+	});
+
+	test('BUG: should display current year in datepicker', async ({ registerPage }) => {
+		test.fail(); // Bug: datepicker opens with 1995 instead of current year
+
+		const currentYear = new Date().getFullYear().toString();
+
+		await registerPage.clickBirthDateInput();
+
+		const displayedYear = await registerPage.getDatePickerYear().textContent();
+
+		expect(displayedYear).toBe(currentYear);
+	});
+
+	test('BUG: should reset future date to current date when using "Done" button in datepicker', async ({
+		registerPage,
+	}) => {
+		test.fail(); // Bug: datepicker allows selecting future date - 'Done' button did not reset future date to current date
+
+		const birthDateField = registerPage.getBirthDateInput();
+		const currentDate = getCurrentDate();
+		const futureDate = getFutureDate();
+
+		await registerPage.clickBirthDateInput();
+		await registerPage.fillRegistrationForm({ birthDate: futureDate });
+		await registerPage.clickDatepickerDoneButton();
+
+		await expect(birthDateField).not.toBeEmpty();
+		await expect(birthDateField).toHaveValue(currentDate);
+	});
+
+	test('BUG: should reset future date to current date when using "Enter" key', async ({ registerPage }) => {
+		test.fail(); // Bug: Enter resets to hardcoded defaultDate (1995-10-10) instead of current date
+
+		const birthDateField = registerPage.getBirthDateInput();
+		const currentDate = getCurrentDate();
+		const futureDate = getFutureDate();
+
+		await registerPage.clickBirthDateInput();
+		await registerPage.fillRegistrationForm({ birthDate: futureDate });
+		await birthDateField.press('Enter');
+
+		await expect(birthDateField).not.toBeEmpty();
+		await expect(birthDateField).toHaveValue(currentDate);
+	});
+
+	test('BUG: should reset very old date to current date when using "Done" button in datepicker ', async ({
+		registerPage,
+	}) => {
+		test.fail(); // Bug: datepicker allows selecting date older than 120 years - 'Done' button did not reset past date to current date
+
+		const birthDateField = registerPage.getBirthDateInput();
+		const ancientDate = getPastDate(200);
+		const currentDate = getCurrentDate();
+
+		await registerPage.clickBirthDateInput();
+		await registerPage.fillRegistrationForm({ birthDate: ancientDate });
+		await registerPage.clickDatepickerDoneButton();
+
+		await expect(birthDateField).not.toBeEmpty();
+		await expect(birthDateField).toHaveValue(currentDate);
+	});
+
+	test('BUG: should reset very old date to current date when using "Enter" key', async ({ registerPage }) => {
+		test.fail(); // Bug: Enter resets to hardcoded defaultDate (1995-10-10) instead of current date
+
+		const birthDateField = registerPage.getBirthDateInput();
+		const ancientDate = getPastDate(500);
+		const currentDate = getCurrentDate();
+
+		await registerPage.clickBirthDateInput();
+		await registerPage.fillRegistrationForm({ birthDate: ancientDate });
+		await birthDateField.press('Enter');
+
+		await expect(birthDateField).not.toBeEmpty();
+		await expect(birthDateField).toHaveValue(currentDate);
 	});
 });
