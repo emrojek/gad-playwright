@@ -187,7 +187,9 @@ test.describe('Registration Form', () => {
 		await expect(birthDateField).toHaveValue(expectedDate);
 	});
 
-	test('should display current month in datepicker', async ({ registerPage }) => {
+	test('BUG: should display current month in datepicker', async ({ registerPage }) => {
+		test.fail(); // Bug: datepicker opens with October (due to hardcoded 1995-10-10 date) instead of current month
+
 		const currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
 
 		await registerPage.clickBirthDateInput();
@@ -198,7 +200,7 @@ test.describe('Registration Form', () => {
 	});
 
 	test('BUG: should display current year in datepicker', async ({ registerPage }) => {
-		test.fail(); // Bug: datepicker opens with 1995 instead of current year
+		test.fail(); // Bug: datepicker opens with 1995 (due to hardcoded 1995-10-10 date) instead of current year
 
 		const currentYear = new Date().getFullYear().toString();
 
@@ -271,5 +273,47 @@ test.describe('Registration Form', () => {
 
 		await expect(birthDateField).not.toBeEmpty();
 		await expect(birthDateField).toHaveValue(currentDate);
+	});
+
+	test('BUG: should prevent registration with future birth date', async ({ page, registerPage, loginPage }) => {
+		// Bug: Registration allowed with future birth date
+
+		const { firstName, lastName, email } = generateRandomUserData();
+		const loginButton = loginPage.getLoginButton();
+		const futureDate = getFutureDate();
+
+		await registerPage.fillRegistrationForm({
+			firstName,
+			lastName,
+			email,
+			birthDate: futureDate,
+			password: TEST_PASSWORDS.valid,
+		});
+		await registerPage.clickDatepickerDoneButton();
+		await registerPage.clickRegisterButton();
+
+		await expect(loginButton).toBeVisible();
+		await expect(page).toHaveURL('/login/');
+	});
+
+	test('BUG: should prevent registration with unrealistic past date', async ({ page, registerPage, loginPage }) => {
+		// Bug: Registration allowed with unrealistic past birth date
+
+		const { firstName, lastName, email } = generateRandomUserData();
+		const loginButton = loginPage.getLoginButton();
+		const ancientDate = getPastDate(500);
+
+		await registerPage.fillRegistrationForm({
+			firstName,
+			lastName,
+			email,
+			birthDate: ancientDate,
+			password: TEST_PASSWORDS.valid,
+		});
+		await registerPage.clickDatepickerDoneButton();
+		await registerPage.clickRegisterButton();
+
+		await expect(loginButton).toBeVisible();
+		await expect(page).toHaveURL('/login/');
 	});
 });
