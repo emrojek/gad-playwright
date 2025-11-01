@@ -37,39 +37,23 @@ export type RegisterPage = {
 };
 
 export const createRegisterPage = (page: Page): RegisterPage => ({
-	openUserMenu: async () => {
-		await page.getByTestId('btn-dropdown').hover();
-	},
+	openUserMenu: async () => await page.getByTestId('btn-dropdown').hover(),
 
-	clickPageRegisterButton: async () => {
-		await page.getByRole('link', { name: 'Register' }).click();
-	},
+	clickPageRegisterButton: async () => await page.getByRole('link', { name: 'Register' }).click(),
 
 	fillRegistrationForm: async (userData: RegistrationData) => {
-		if (userData.firstName) {
-			await page.getByTestId('firstname-input').fill(userData.firstName);
-		}
+		if (userData.firstName) await page.getByTestId('firstname-input').fill(userData.firstName);
 
-		if (userData.lastName) {
-			await page.getByTestId('lastname-input').fill(userData.lastName);
-		}
+		if (userData.lastName) await page.getByTestId('lastname-input').fill(userData.lastName);
 
-		if (userData.email) {
-			await page.getByTestId('email-input').fill(userData.email);
-		}
+		if (userData.email) await page.getByTestId('email-input').fill(userData.email);
 
-		if (userData.birthDate) {
-			await page.getByTestId('birthdate-input').fill(userData.birthDate);
-		}
+		if (userData.birthDate) await page.getByTestId('birthdate-input').fill(userData.birthDate);
 
-		if (userData.password) {
-			await page.getByTestId('password-input').fill(userData.password);
-		}
+		if (userData.password) await page.getByTestId('password-input').fill(userData.password);
 	},
 
-	clickDatepickerDoneButton: async () => {
-		await page.getByRole('button', { name: 'Done' }).click();
-	},
+	clickDatepickerDoneButton: async () => await page.getByRole('button', { name: 'Done' }).click(),
 
 	selectAvatar: async (avatarName?: string) => {
 		const avatarDropdown = page.getByRole('combobox');
@@ -79,9 +63,7 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 		} else {
 			const firstOption = await avatarDropdown.locator('option').first().getAttribute('value');
 
-			if (firstOption === null) {
-				throw new Error('No avatar options available to select.');
-			}
+			if (firstOption === null) throw new Error('No avatar options available to select.');
 
 			await avatarDropdown.selectOption(firstOption);
 		}
@@ -97,9 +79,7 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 
 	getRegisterButton: () => page.getByRole('button', { name: 'Register' }),
 
-	clickRegisterButton: async () => {
-		await page.getByRole('button', { name: 'Register' }).click();
-	},
+	clickRegisterButton: async () => await page.getByRole('button', { name: 'Register' }).click(),
 
 	getValidationErrorsCount: async () => await page.locator('p.octavalidate-txt-error').count(),
 
@@ -116,21 +96,13 @@ export const createRegisterPage = (page: Page): RegisterPage => ({
 
 	getDatepicker: () => page.locator('#ui-datepicker-div'),
 
-	clickBirthDateInput: async () => {
-		await page.getByTestId('birthdate-input').click();
-	},
+	clickBirthDateInput: async () => await page.getByTestId('birthdate-input').click(),
 
-	clickDatePickerNext: async () => {
-		await page.getByTitle('>').click();
-	},
+	clickDatePickerNext: async () => await page.getByTitle('>').click(),
 
-	clickDatePickerPrev: async () => {
-		await page.getByTitle('<').click();
-	},
+	clickDatePickerPrev: async () => await page.getByTitle('<').click(),
 
-	selectDayFromDatepicker: async (day: string) => {
-		await page.getByRole('link', { name: day }).click();
-	},
+	selectDayFromDatepicker: async (day: string) => await page.getByRole('link', { name: day }).click(),
 
 	getDatePickerMonth: () => page.locator('span.ui-datepicker-month'),
 

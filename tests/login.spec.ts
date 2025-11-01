@@ -102,5 +102,14 @@ test.describe('Login Form', () => {
 			await expect(errorMessage).toBeVisible();
 			await expect(errorMessage).toHaveText('Invalid username or password');
 		});
+
+		test('should redirect user to registration page via header link', async ({ page, loginPage, registerPage }) => {
+			const registerButton = registerPage.getRegisterButton();
+
+			await loginPage.clickHeaderRegisterButton();
+
+			await expect(page).toHaveURL('/register.html');
+			await expect(registerButton).toBeVisible();
+		});
 	});
 });
