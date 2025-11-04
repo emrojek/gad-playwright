@@ -16,3 +16,5 @@ export const test = base.extend<PageFixtures>({
 		await use(createRegisterPage(page));
 	},
 });
+
+export { expect } from '@playwright/test';

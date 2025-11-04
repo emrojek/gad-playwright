@@ -1,5 +1,4 @@
-import { test as base } from './pages.fixture';
-import { expect } from '@playwright/test';
+import { test as base, expect } from './pages.fixture';
 import { generateRandomUserData } from '../helpers/generate-random-data';
 import { TEST_PASSWORDS } from '../helpers/test-constants';
 
@@ -37,4 +36,4 @@ export const test = base.extend<TestFixtures>({
 	},
 });
 
-export { expect } from '@playwright/test';
+export { expect } from './pages.fixture';
