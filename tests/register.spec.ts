@@ -3,6 +3,8 @@ import { generateRandomUserData } from '../helpers/generate-random-data';
 import { convertMonthNameToNumber, getCurrentDate, getFutureDate, getPastDate } from '../helpers/date-helpers';
 import { TEST_PASSWORDS } from '../helpers/test-constants';
 
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Registration Form', () => {
 	test.beforeEach(async ({ page, registerPage }) => {
 		const registerButton = registerPage.getRegisterButton();

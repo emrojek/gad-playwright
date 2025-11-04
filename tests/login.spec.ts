@@ -1,5 +1,7 @@
 import { test, expect } from '../fixtures/user.fixture';
 
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Login Form', () => {
 	test.describe('Tests requiring valid user', () => {
 		test('should login successfully', async ({ page, validUser, loginPage }) => {
