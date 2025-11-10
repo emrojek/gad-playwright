@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures/user.fixture';
+import { loginUser } from '../helpers/auth-helpers';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -8,14 +9,9 @@ test.describe('Login Form', () => {
 			const welcomeMessage = loginPage.getWelcomeMessage();
 			const logoutButton = loginPage.getLogoutButton();
 
-			await loginPage.fillLoginForm({
-				email: validUser.email,
-				password: validUser.password,
-			});
+			await loginUser(loginPage, validUser);
 
-			await loginPage.clickFormLoginButton();
 			await expect(logoutButton).toBeVisible();
-
 			await expect(page).toHaveURL('/welcome');
 			await expect(welcomeMessage).toBeVisible();
 			await expect(welcomeMessage).toContainText(`Hi ${validUser.email}`);
@@ -26,12 +22,7 @@ test.describe('Login Form', () => {
 			const loginButton = loginPage.getLoginButton();
 			const logoutButton = loginPage.getLogoutButton();
 
-			await loginPage.fillLoginForm({
-				email: validUser.email,
-				password: validUser.password,
-			});
-
-			await loginPage.clickFormLoginButton();
+			await loginUser(loginPage, validUser);
 			await expect(logoutButton).toBeVisible();
 
 			await loginPage.clickPageLogoutButton();
@@ -54,7 +45,6 @@ test.describe('Login Form', () => {
 				password: validUser.password,
 				keepSignIn: true,
 			});
-
 			await loginPage.clickFormLoginButton();
 			await expect(logoutButton).toBeVisible();
 
