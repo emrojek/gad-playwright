@@ -1,4 +1,3 @@
-// import type { Page } from '@playwright/test';
 import type { RegisterPage } from '../pages/register.page';
 import type { LoginPage } from '../pages/login.page';
 import { generateRandomUserData } from './generate-random-data';
