@@ -54,26 +54,22 @@ gad-playwright/
 ### Prerequisites
 
 -   Node.js 20.x or higher
--   GIT installed
+-   Git installed
 
 ### Installation
 
 ```bash
 # Clone and navigate the repository
-
 git clone https://github.com/emrojek/gad-playwright.git
 cd gad-playwright
 
 # Install dependencies
-
 npm install
 
 # Install Playwright browsers
-
 npx playwright install
 
 # Clone the repository of GAD application
-
 git clone https://github.com/jaktestowac/gad-gui-api-demo.git
 ```
 
@@ -100,7 +96,7 @@ webServer: {
 },
 ```
 
-This will automatically start and stop the application with tests.
+This will automatically start the application with tests and stop it after execution is finished.
 
 #### Option 3: Custom Bash Script (Windows + Git Bash)
 
@@ -108,8 +104,8 @@ Create a `start-gad.sh` script in your GAD application folder:
 
 ```bash
 #!/bin/bash
-echo "▶️ GAD starting..."
-echo "🌐 3 seconds remaining to browser open..."
+echo "GAD starting..."
+echo "3 seconds remaining to browser open..."
 
 (sleep 3 && start http://localhost:3000) & npm run start
 ```
