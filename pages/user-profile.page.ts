@@ -17,6 +17,7 @@ export type UserProfilePage = {
 	getSessionTimer: () => Locator;
 	getPageBody: () => Locator;
 	getEditDashboardButton: () => Locator;
+	getDeleteAccountButton: () => Locator;
 };
 
 export const createUserProfilePage = (page: Page): UserProfilePage => ({
@@ -51,4 +52,6 @@ export const createUserProfilePage = (page: Page): UserProfilePage => ({
 	getPageBody: () => page.locator('body'),
 
 	getEditDashboardButton: () => page.getByRole('button', { name: /Edit this Dashboard|Save this Dashboard/ }),
+
+	getDeleteAccountButton: () => page.getByRole('button', { name: 'Delete Account' }),
 });

@@ -62,6 +62,37 @@ test.describe('Login Form', () => {
 			await expect(newPageLogoutButton).toBeVisible();
 			await expect(newUserWelcome).toContainText(`Hello ${validUser.firstName}`);
 		});
+
+		test('should delete user when clicking "Delete Account" button', async ({
+			page,
+			validUser,
+			loginPage,
+			userProfilePage,
+		}) => {
+			const deleteButton = userProfilePage.getDeleteAccountButton();
+
+			await loginUser(loginPage, validUser);
+
+			await expect(deleteButton).toBeVisible();
+
+			page.once('dialog', async dialog => {
+				expect(dialog.message()).toContain('Are you sure you want to delete your account?');
+
+				await dialog.accept();
+			});
+
+			await deleteButton.click();
+
+			await expect(page).toHaveURL('/login/');
+
+			await loginPage.fillLoginForm({
+				email: validUser.email,
+				password: validUser.password,
+			});
+			await loginPage.clickFormLoginButton();
+
+			await expect(loginPage.getFormLoginError()).toBeVisible();
+		});
 	});
 
 	test.describe('Tests without user registration', () => {
