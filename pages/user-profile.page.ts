@@ -15,6 +15,8 @@ export type UserProfilePage = {
 	clickToggleDarkmode: () => Promise<void>;
 	getUserAvatar: () => Locator;
 	getSessionTimer: () => Locator;
+	getPageBody: () => Locator;
+	getEditDashboardButton: () => Locator;
 };
 
 export const createUserProfilePage = (page: Page): UserProfilePage => ({
@@ -45,4 +47,8 @@ export const createUserProfilePage = (page: Page): UserProfilePage => ({
 	getUserAvatar: () => page.locator('#myAvatar'),
 
 	getSessionTimer: () => page.getByTestId('countDown'),
+
+	getPageBody: () => page.locator('body'),
+
+	getEditDashboardButton: () => page.getByRole('button', { name: /Edit this Dashboard|Save this Dashboard/ }),
 });
