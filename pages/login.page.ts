@@ -20,7 +20,7 @@ export type LoginPage = {
 };
 
 export const createLoginPage = (page: Page): LoginPage => ({
-	openUserMenu: async () => await page.getByTestId('btn-dropdown').hover(),
+	openUserMenu: async () => await page.getByTestId('btn-dropdown').click(),
 
 	clickPageLoginButton: async () => await page.getByRole('link', { name: 'Login' }).click(),
 

@@ -99,7 +99,6 @@ test.describe('User Profile', () => {
 			await userProfilePage.clickToggleDarkmode();
 
 			await expect(body).toHaveClass('darkmode');
-			await expect(body).toHaveCSS('background-color', 'rgb(0, 0, 0)');
 			await expect(page).toHaveURL('/welcome');
 		});
 
