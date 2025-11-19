@@ -1,7 +1,7 @@
-import { test, expect } from '../fixtures/user.fixture';
-import { generateRandomUserData } from '../helpers/generate-random-data';
-import { convertMonthNameToNumber, getCurrentDate, getFutureDate, getPastDate } from '../helpers/date-helpers';
-import { TEST_PASSWORDS } from '../helpers/test-constants';
+import { test, expect } from '../../fixtures/user.fixture';
+import { generateRandomUserData } from '../../helpers/generate-random-data';
+import { convertMonthNameToNumber, getCurrentDate, getFutureDate, getPastDate } from '../../helpers/date-helpers';
+import { TEST_PASSWORDS } from '../../helpers/test-constants';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

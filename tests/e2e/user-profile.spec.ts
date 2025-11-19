@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/pages.fixture';
+import { test, expect } from '../../fixtures/pages.fixture';
 
 test.describe('User Profile', () => {
 	test.describe('Menu dropdown navigation', () => {

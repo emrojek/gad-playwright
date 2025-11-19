@@ -1,5 +1,5 @@
-import { test as setup, expect } from '../fixtures/pages.fixture';
-import { registerUser, loginUser, type UserCredentials } from '../helpers/auth-helpers';
+import { test as setup, expect } from '../../fixtures/pages.fixture';
+import { registerUser, loginUser, type UserCredentials } from '../../helpers/auth-helpers';
 
 const authFile = '.auth/user.json';
 
