@@ -2,7 +2,7 @@
 
 ## 📌 About the project
 
-Project has been created for educational purposes to improve skills of automation e2e testing using [Playwright 🎭](https://playwright.dev/) framework. Tests have been written for [GAD 🦎](https://github.com/jaktestowac/gad-gui-api-demo) application made available by [jaktestowac.pl](https://jaktestowac.pl/) team.
+Project has been created for educational purposes to improve skills of automation testing using [Playwright 🎭](https://playwright.dev/) framework. Tests have been written for [GAD 🦎](https://github.com/jaktestowac/gad-gui-api-demo) application made available by [jaktestowac.pl](https://jaktestowac.pl/) team and include both **E2E (UI)** and **API** scenarios.
 
 ## 🛠️ Tech stack
 
@@ -16,6 +16,7 @@ Project has been created for educational purposes to improve skills of automatio
 ## 🏗️ Architecture Highlights
 
 -   **Functional Page Objects** – Pure functions instead of classes for better composability
+-   **API Testing Support** – Dedicated project configuration for fast, headless API tests
 -   **Custom Fixtures** – Reusable test setup with automatic cleanup (`validUser`, `pages`)
 -   **Test Data Helpers** – Faker.js integration for deterministic random data generation
 -   **Auth State Management** – StorageState caching for tests requiring authenticated user sessions
@@ -25,6 +26,9 @@ Project has been created for educational purposes to improve skills of automatio
 ```
 gad-playwright/
 ├── .auth/
+├── api/
+│ ├── fixtures/
+│ │   ├── api.fixture.ts
 ├── fixtures/
 │ ├── pages.fixture.ts
 │ └── user.fixture.ts
@@ -37,10 +41,14 @@ gad-playwright/
 │ ├── register.page.ts
 │ └── user-profile.page.ts
 ├── tests/
-│ ├── auth.setup.ts
-│ ├── login.spec.ts
-│ ├── register.spec.ts
-│ └── user-profile.spec.ts
+│ ├── api/
+│ │   ├── auth.setup.ts
+│ └── e2e/
+|     ├── auth.setup.ts
+│     ├── auth.setup.ts
+│     ├── login.spec.ts
+│     ├── register.spec.ts
+│     └── user-profile.spec.ts
 ├── .gitignore
 ├── .prettierrc.json
 ├── package.json
@@ -122,6 +130,15 @@ Create a desktop shortcut from `git-bash.exe` file (default file location is `C:
 # Run all tests (headless)
 npm test
 
+# Run only E2E tests (UI)
+npm run test:e2e
+
+# Run only API tests
+npm run test:api
+
+# Generate HTML report
+npm run report
+
 # Run tests in headed mode
 npm run test:headed
 
@@ -130,7 +147,4 @@ npm run test:debug
 
 # Run tests with trace
 npm run test:trace
-
-# Generate HTML report
-npm run report
 ```
