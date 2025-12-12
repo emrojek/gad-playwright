@@ -38,11 +38,20 @@ export default defineConfig({
 
 	/* Configure projects for major browsers */
 	projects: [
-		{ name: 'setup', testMatch: /.*\.setup\.ts/ },
+		{ name: 'e2e-setup', testMatch: /.*e2e.*\.setup\.ts/ },
 		{
 			name: 'chromium',
+			testDir: './tests/e2e',
 			use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' },
-			dependencies: ['setup'],
+			testIgnore: /.*api.*\.setup\.ts/,
+			dependencies: ['e2e-setup'],
+		},
+		{ name: 'api-setup', testMatch: /.*api.*\.setup\.ts/ },
+		{
+			name: 'api',
+			testDir: './tests/api',
+			testIgnore: /.*e2e.*\.setup\.ts/,
+			dependencies: ['api-setup'],
 		},
 
 		// {
