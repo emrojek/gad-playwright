@@ -4,7 +4,8 @@ export type RandomUserData = {
 	firstName: string;
 	lastName: string;
 	email: string;
-	birthDate: string;
+	birthDate?: string;
+	avatar?: string;
 };
 
 export const generateRandomUserData = (): RandomUserData => {
@@ -16,10 +17,13 @@ export const generateRandomUserData = (): RandomUserData => {
 	const birthDate =
 		faker.date.birthdate({ min: 1970, max: 2005, mode: 'year' }).toISOString().split('T')[0] ?? '1990-01-01';
 
+	const avatar = faker.image.avatar();
+
 	return {
 		firstName,
 		lastName,
 		email,
 		birthDate,
+		avatar,
 	};
 };
