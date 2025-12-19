@@ -26,13 +26,13 @@ Project has been created for educational purposes to improve skills of automatio
 ```
 gad-playwright/
 ├── .auth/
-├── api/
-│ ├── fixtures/
-│ │   ├── api.fixture.ts
 ├── fixtures/
 │ ├── pages.fixture.ts
-│ └── user.fixture.ts
+│ ├── user.fixture.ts
+│ └── api.fixture.ts
 ├── helpers/
+│ ├── api-helpers.ts
+│ ├── auth-helpers.ts
 │ ├── date-helpers.ts
 │ ├── generate-random-data.ts
 │ └── test-constants.ts
@@ -43,14 +43,15 @@ gad-playwright/
 ├── tests/
 │ ├── api/
 │ │   ├── auth.setup.ts
+│ │   ├── users.spec.ts
 │ └── e2e/
-|     ├── auth.setup.ts
 │     ├── auth.setup.ts
 │     ├── login.spec.ts
 │     ├── register.spec.ts
 │     └── user-profile.spec.ts
 ├── .gitignore
 ├── .prettierrc.json
+├── package-lock.json
 ├── package.json
 ├── playwright.config.ts
 ├── README.md
