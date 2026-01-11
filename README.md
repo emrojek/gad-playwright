@@ -42,6 +42,7 @@ gad-playwright/
 │ └── user-profile.page.ts
 ├── tests/
 │ ├── api/
+│ │   ├── articles.spec.ts
 │ │   ├── auth.setup.ts
 │ │   ├── users.spec.ts
 │ └── e2e/

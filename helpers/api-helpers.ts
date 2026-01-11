@@ -55,3 +55,7 @@ export const expectJsonResponseWithBody = async <T = unknown>(
 export const deleteUser = async (request: APIRequestContext, userId: number): Promise<void> => {
 	await request.delete(`/api/users/${userId}`).catch(() => {});
 };
+
+export const deleteArticle = async (request: APIRequestContext, articleId: number): Promise<void> => {
+	await request.delete(`/api/articles/${articleId}`).catch(() => {});
+};

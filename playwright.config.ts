@@ -50,6 +50,7 @@ export default defineConfig({
 		{
 			name: 'api',
 			testDir: './tests/api',
+			fullyParallel: false,
 			testIgnore: /.*e2e.*\.setup\.ts/,
 			dependencies: ['api-setup'],
 		},
