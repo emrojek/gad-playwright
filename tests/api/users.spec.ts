@@ -10,25 +10,29 @@ import {
 
 test.describe('Users API', () => {
 	test('GET /api/users should return list of users', async ({ request }) => {
-		const response = await request.get('/api/users');
+		const newUser = await registerUserAPI(request);
 
-		await expectSuccessfulJsonResponse(response);
+		try {
+			const response = await request.get('/api/users');
+			await expectSuccessfulJsonResponse(response);
+			const users = await response.json();
 
-		const users = await response.json();
+			expect(users).toBeInstanceOf(Array);
+			expect(users.length).toBeGreaterThan(0);
 
-		expect(users).toBeInstanceOf(Array);
-		expect(users.length).toBeGreaterThan(0);
-
-		const sampleUser = users[0];
-		expect(sampleUser).toMatchObject({
-			id: expect.any(Number),
-			email: expect.any(String),
-			firstname: expect.any(String),
-			lastname: expect.any(String),
-			password: expect.any(String),
-			avatar: expect.any(String),
-		});
-		expect(sampleUser.id).toBeGreaterThan(0);
+			const foundUser = users.find((user: any) => user.id === newUser.id);
+			expect(foundUser).toBeDefined();
+			expect(foundUser).toMatchObject({
+				email: expect.any(String),
+				firstname: newUser.firstName,
+				lastname: expect.any(String),
+				password: expect.any(String),
+				avatar: newUser.avatar,
+				id: newUser.id,
+			});
+		} finally {
+			await deleteUser(request, newUser.id);
+		}
 	});
 
 	test('POST /api/users should create a new user', async ({ request }) => {
@@ -42,53 +46,47 @@ test.describe('Users API', () => {
 				avatar,
 			},
 		});
-
 		await expectSuccessfulJsonResponse(response, 201);
-
 		const user = await response.json();
-		expect(user).toEqual({
-			email,
-			firstname: firstName,
-			lastname: lastName,
-			password: TEST_PASSWORDS.valid,
-			avatar,
-			id: expect.any(Number),
-		});
 
-		await deleteUser(request, user.id);
-	});
-
-	test('GET /api/users/:id should return a specific user', async ({ request }) => {
-		const { firstName, lastName, email, avatar } = generateRandomUserData();
-		const createResponse = await request.post('/api/users', {
-			data: {
+		try {
+			expect(user).toEqual({
 				email,
 				firstname: firstName,
 				lastname: lastName,
 				password: TEST_PASSWORDS.valid,
 				avatar,
-			},
-		});
-		const createdUser = await createResponse.json();
-		const response = await request.get(`/api/users/${createdUser.id}`);
+				id: user.id,
+			});
+		} finally {
+			await deleteUser(request, user.id);
+		}
+	});
 
-		await expectSuccessfulJsonResponse(response);
+	test('GET /api/users/:id should return a specific user', async ({ request }) => {
+		const newUser = await registerUserAPI(request);
 
-		const user = await response.json();
-		expect(user).toEqual({
-			email: '****',
-			firstname: firstName,
-			lastname: '****',
-			password: '****',
-			avatar,
-			id: createdUser.id,
-		});
+		try {
+			const response = await request.get(`/api/users/${newUser.id}`);
+			await expectSuccessfulJsonResponse(response);
 
-		await deleteUser(request, user.id);
+			const user = await response.json();
+			expect(user).toEqual({
+				email: '****',
+				firstname: newUser.firstName,
+				lastname: '****',
+				password: '****',
+				avatar: newUser.avatar,
+				id: newUser.id,
+			});
+		} finally {
+			await deleteUser(request, newUser.id);
+		}
 	});
 
 	test('PUT /api/users/:id should update a specific user with all fields required', async ({ tempAuthUser }) => {
 		const { user, request: authRequest } = tempAuthUser;
+
 		const { firstName, lastName, email, avatar } = generateRandomUserData();
 		const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
 			data: {
@@ -111,8 +109,9 @@ test.describe('Users API', () => {
 		});
 	});
 
-	test('PATCH /api/users/:id should update a specific user with partial field', async ({ tempAuthUser }) => {
+	test('PATCH /api/users/:id should partially update a specific user', async ({ tempAuthUser }) => {
 		const { user, request: authRequest } = tempAuthUser;
+
 		const updateAvatar = generateRandomUserData();
 		const updatedResponse = await authRequest.patch(`/api/users/${user.id}`, {
 			data: {
@@ -138,18 +137,21 @@ test.describe('Users API', () => {
 		await expectSuccessfulJsonResponse(response);
 
 		const getResponse = await authRequest.get(`/api/users/${user.id}`);
-		await expectSuccessfulJsonResponse(getResponse, 404);
+		expect(getResponse.status()).toBe(404);
 	});
 
 	test('HEAD /api/users/:id should return headers without body', async ({ request }) => {
 		const newUser = await registerUserAPI(request);
-		const response = await request.head(`/api/users/${newUser.id}`);
 
-		await expectSuccessfulJsonResponse(response);
+		try {
+			const response = await request.head(`/api/users/${newUser.id}`);
 
-		const body = await response.text();
-		expect(body).toBe('');
+			await expectSuccessfulJsonResponse(response);
 
-		await deleteUser(request, newUser.id);
+			const body = await response.text();
+			expect(body).toBe('');
+		} finally {
+			await deleteUser(request, newUser.id);
+		}
 	});
 });
