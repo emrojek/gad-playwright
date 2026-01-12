@@ -13,7 +13,6 @@ export type ApiUser = {
 
 export const registerUserAPI = async (request: APIRequestContext): Promise<ApiUser> => {
 	const { firstName, lastName, email, avatar } = generateRandomUserData();
-
 	const response = await request.post('/api/users', {
 		data: {
 			email,
@@ -23,7 +22,7 @@ export const registerUserAPI = async (request: APIRequestContext): Promise<ApiUs
 			avatar: avatar,
 		},
 	});
-
+	await expectSuccessfulJsonResponse(response, 201);
 	const user = await response.json();
 
 	return {

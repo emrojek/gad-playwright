@@ -1,5 +1,5 @@
 import { test as base, APIRequestContext } from '@playwright/test';
-import { registerUserAPI, type ApiUser } from '../helpers/api-helpers';
+import { expectJsonResponseWithBody, registerUserAPI, type ApiUser } from '../helpers/api-helpers';
 import fs from 'fs';
 
 type ApiFixtures = {
@@ -35,7 +35,7 @@ export const test = base.extend<ApiFixtures>({
 			},
 		});
 
-		const { access_token } = await loginResponse.json();
+		const { access_token } = await expectJsonResponseWithBody<{ access_token: string }>(loginResponse);
 
 		const authContext = await playwright.request.newContext({
 			baseURL: 'http://localhost:3000',
