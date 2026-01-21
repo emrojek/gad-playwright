@@ -11,6 +11,15 @@ export type ApiUser = {
 	id: number;
 };
 
+export type ApiUserResponse = {
+	firstname: string;
+	lastname: string;
+	email: string;
+	password: string;
+	avatar: string;
+	id: number;
+};
+
 export const registerUserAPI = async (request: APIRequestContext): Promise<ApiUser> => {
 	const { firstName, lastName, email, avatar } = generateRandomUserData();
 	const response = await request.post('/api/users', {
@@ -38,6 +47,14 @@ export const registerUserAPI = async (request: APIRequestContext): Promise<ApiUs
 export const expectSuccessfulJsonResponse = async (
 	response: APIResponse,
 	expectedStatus: number = 200
+): Promise<void> => {
+	expect(response.status()).toBe(expectedStatus);
+	expect(response.headers()['content-type']).toContain('application/json');
+};
+
+export const expectUnsuccessfulJsonResponse = async (
+	response: APIResponse,
+	expectedStatus: number = 400
 ): Promise<void> => {
 	expect(response.status()).toBe(expectedStatus);
 	expect(response.headers()['content-type']).toContain('application/json');
