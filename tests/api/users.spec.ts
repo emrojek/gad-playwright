@@ -3,155 +3,336 @@ import { generateRandomUserData } from '../../helpers/generate-random-data';
 import { TEST_PASSWORDS } from '../../helpers/test-constants';
 import {
 	expectSuccessfulJsonResponse,
+	expectUnsuccessfulJsonResponse,
 	expectJsonResponseWithBody,
 	deleteUser,
-	registerUserAPI,
+	ApiUserResponse,
 } from '../../helpers/api-helpers';
 
 test.describe('Users API', () => {
-	test('GET /api/users should return list of users', async ({ request }) => {
-		const newUser = await registerUserAPI(request);
-
-		try {
+	test.describe('Positive scenarios', () => {
+		test('GET /api/users should return list of users', async ({ request, tempUser }) => {
 			const response = await request.get('/api/users');
+
 			await expectSuccessfulJsonResponse(response);
+
 			const users = await response.json();
 
 			expect(users).toBeInstanceOf(Array);
 			expect(users.length).toBeGreaterThan(0);
 
-			const foundUser = users.find((user: any) => user.id === newUser.id);
+			const foundUser = users.find((user: ApiUserResponse) => user.id === tempUser.id);
+
 			expect(foundUser).toBeDefined();
 			expect(foundUser).toMatchObject({
 				email: expect.any(String),
-				firstname: newUser.firstName,
+				firstname: tempUser.firstName,
 				lastname: expect.any(String),
 				password: expect.any(String),
-				avatar: newUser.avatar,
-				id: newUser.id,
+				avatar: tempUser.avatar,
+				id: tempUser.id,
 			});
-		} finally {
-			await deleteUser(request, newUser.id);
-		}
-	});
-
-	test('POST /api/users should create a new user', async ({ request }) => {
-		const { firstName, lastName, email, avatar } = generateRandomUserData();
-		const response = await request.post('/api/users', {
-			data: {
-				email,
-				firstname: firstName,
-				lastname: lastName,
-				password: TEST_PASSWORDS.valid,
-				avatar,
-			},
 		});
-		await expectSuccessfulJsonResponse(response, 201);
-		const user = await response.json();
 
-		try {
-			expect(user).toEqual({
-				email,
-				firstname: firstName,
-				lastname: lastName,
-				password: TEST_PASSWORDS.valid,
-				avatar,
-				id: user.id,
+		test('POST /api/users should create a new user', async ({ request }) => {
+			const { firstName, lastName, email, avatar } = generateRandomUserData();
+			const response = await request.post('/api/users', {
+				data: {
+					email,
+					firstname: firstName,
+					lastname: lastName,
+					password: TEST_PASSWORDS.valid,
+					avatar,
+				},
 			});
-		} finally {
-			await deleteUser(request, user.id);
-		}
-	});
 
-	test('GET /api/users/:id should return a specific user', async ({ request }) => {
-		const newUser = await registerUserAPI(request);
+			await expectSuccessfulJsonResponse(response, 201);
 
-		try {
-			const response = await request.get(`/api/users/${newUser.id}`);
+			const user = await response.json();
+
+			try {
+				expect(user).toEqual({
+					email,
+					firstname: firstName,
+					lastname: lastName,
+					password: TEST_PASSWORDS.valid,
+					avatar,
+					id: user.id,
+				});
+			} finally {
+				await deleteUser(request, user.id);
+			}
+		});
+
+		test('GET /api/users/:id should return a specific user', async ({ request, tempUser }) => {
+			const response = await request.get(`/api/users/${tempUser.id}`);
+
 			await expectSuccessfulJsonResponse(response);
 
 			const user = await response.json();
+
 			expect(user).toEqual({
 				email: '****',
-				firstname: newUser.firstName,
+				firstname: tempUser.firstName,
 				lastname: '****',
 				password: '****',
-				avatar: newUser.avatar,
-				id: newUser.id,
+				avatar: tempUser.avatar,
+				id: tempUser.id,
 			});
-		} finally {
-			await deleteUser(request, newUser.id);
-		}
-	});
+		});
 
-	test('PUT /api/users/:id should update a specific user with all fields required', async ({ tempAuthUser }) => {
-		const { user, request: authRequest } = tempAuthUser;
+		test('PUT /api/users/:id should update a specific user with all fields required', async ({ tempAuthUser }) => {
+			const { user, request: authRequest } = tempAuthUser;
+			const { firstName, lastName, email, avatar } = generateRandomUserData();
+			const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
+				data: {
+					email,
+					firstname: firstName,
+					lastname: lastName,
+					password: TEST_PASSWORDS.weak,
+					avatar,
+				},
+			});
+			const updatedUser = await expectJsonResponseWithBody(updatedResponse);
 
-		const { firstName, lastName, email, avatar } = generateRandomUserData();
-		const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
-			data: {
-				email: email,
+			expect(updatedUser).toEqual({
+				email,
 				firstname: firstName,
 				lastname: lastName,
 				password: TEST_PASSWORDS.weak,
-				avatar: avatar,
-			},
+				avatar,
+				id: user.id,
+			});
 		});
 
-		const updatedUser = await expectJsonResponseWithBody(updatedResponse);
-		expect(updatedUser).toEqual({
-			email: email,
-			firstname: firstName,
-			lastname: lastName,
-			password: TEST_PASSWORDS.weak,
-			avatar: avatar,
-			id: user.id,
+		test('PATCH /api/users/:id should partially update a specific user', async ({ tempAuthUser }) => {
+			const { user, request: authRequest } = tempAuthUser;
+			const newUserData = generateRandomUserData();
+			const updatedResponse = await authRequest.patch(`/api/users/${user.id}`, {
+				data: {
+					avatar: newUserData.avatar,
+				},
+			});
+			const updatedUser = await expectJsonResponseWithBody(updatedResponse);
+
+			expect(updatedUser).toEqual({
+				email: user.email,
+				firstname: user.firstName,
+				lastname: user.lastName,
+				password: user.password,
+				avatar: newUserData.avatar,
+				id: user.id,
+			});
 		});
-	});
 
-	test('PATCH /api/users/:id should partially update a specific user', async ({ tempAuthUser }) => {
-		const { user, request: authRequest } = tempAuthUser;
+		test('DELETE /api/users/:id should delete a user', async ({ tempAuthUser }) => {
+			const { user, request: authRequest } = tempAuthUser;
+			const response = await authRequest.delete(`/api/users/${user.id}`);
 
-		const updateAvatar = generateRandomUserData();
-		const updatedResponse = await authRequest.patch(`/api/users/${user.id}`, {
-			data: {
-				avatar: updateAvatar.avatar,
-			},
+			await expectSuccessfulJsonResponse(response);
+
+			const getResponse = await authRequest.get(`/api/users/${user.id}`);
+
+			expect(getResponse.status()).toBe(404);
 		});
 
-		const updatedUser = await expectJsonResponseWithBody(updatedResponse);
-		expect(updatedUser).toEqual({
-			email: user.email,
-			firstname: user.firstName,
-			lastname: user.lastName,
-			password: user.password,
-			avatar: updateAvatar.avatar,
-			id: user.id,
-		});
-	});
-
-	test('DELETE /api/users/:id should delete a user', async ({ tempAuthUser }) => {
-		const { user, request: authRequest } = tempAuthUser;
-
-		const response = await authRequest.delete(`/api/users/${user.id}`);
-		await expectSuccessfulJsonResponse(response);
-
-		const getResponse = await authRequest.get(`/api/users/${user.id}`);
-		expect(getResponse.status()).toBe(404);
-	});
-
-	test('HEAD /api/users/:id should return headers without body', async ({ request }) => {
-		const newUser = await registerUserAPI(request);
-
-		try {
-			const response = await request.head(`/api/users/${newUser.id}`);
+		test('HEAD /api/users/:id should return headers without body', async ({ request, tempUser }) => {
+			const response = await request.head(`/api/users/${tempUser.id}`);
 
 			await expectSuccessfulJsonResponse(response);
 
 			const body = await response.text();
+
 			expect(body).toBe('');
-		} finally {
-			await deleteUser(request, newUser.id);
-		}
+		});
+	});
+
+	test.describe('Negative scenarios', () => {
+		test('POST /api/users should not create a new user with previously used email', async ({ request }) => {
+			const { firstName, lastName, email, avatar } = generateRandomUserData();
+			const response = await request.post('/api/users', {
+				data: {
+					email,
+					firstname: firstName,
+					lastname: lastName,
+					password: TEST_PASSWORDS.valid,
+					avatar,
+				},
+			});
+
+			await expectSuccessfulJsonResponse(response, 201);
+
+			const user = await response.json();
+			const duplicateResponse = await request.post('/api/users', {
+				data: {
+					email: user.email,
+					firstname: firstName,
+					lastname: lastName,
+					password: TEST_PASSWORDS.valid,
+					avatar,
+				},
+			});
+
+			try {
+				await expectUnsuccessfulJsonResponse(duplicateResponse, 409);
+
+				const duplicateBody = await duplicateResponse.json();
+
+				expect(duplicateBody).toHaveProperty('error');
+				expect(duplicateBody.error.message).toBe('Email not unique');
+			} finally {
+				await deleteUser(request, user.id);
+			}
+		});
+
+		test('POST /api/users should not create a new user with invalid request', async ({ request }) => {
+			const response = await request.post('/api/users', {
+				headers: { 'Content-Type': 'application/json' },
+				data: '{"invalidJson": "true",',
+			});
+
+			await expectUnsuccessfulJsonResponse(response);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error).toContain('Unexpected data in JSON');
+		});
+
+		test('PUT /api/users/:id should return 400 with invalid JSON sent', async ({ tempAuthUser }) => {
+			const { user, request: authRequest } = tempAuthUser;
+			const response = await authRequest.put(`/api/users/${user.id}`, {
+				headers: { 'Content-Type': 'application/json' },
+				data: '{"invalidJson": "true",',
+			});
+
+			await expectUnsuccessfulJsonResponse(response);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error).toContain('Unexpected data in JSON');
+		});
+
+		test('PUT /api/users/:id should return 401 without authorization', async ({ request }) => {
+			const { firstName, lastName, email, avatar } = generateRandomUserData();
+			const response = await request.put('/api/users/1', {
+				data: {
+					email,
+					firstname: firstName,
+					lastname: lastName,
+					password: TEST_PASSWORDS.valid,
+					avatar,
+				},
+			});
+
+			await expectUnsuccessfulJsonResponse(response, 401);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error.message).toBe('Access token not provided!');
+		});
+
+		test('PUT /api/users/:id should return 422 with any of the required fields missing', async ({
+			tempAuthUser,
+		}) => {
+			const { user, request: authRequest } = tempAuthUser;
+			const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
+				data: {
+					email: user.email,
+					firstname: user.firstName,
+					password: user.password,
+					avatar: user.avatar,
+				},
+			});
+
+			await expectUnsuccessfulJsonResponse(updatedResponse, 422);
+
+			const responseBody = await updatedResponse.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error.details).toContain('lastname');
+		});
+	});
+
+	test.describe('Known bugs', { tag: '@bug' }, () => {
+		test('BUG: POST /api/users should not create a new user without all required fields', async ({ request }) => {
+			test.fail(); // Bug: API allows creating user without providing a password
+
+			const { firstName, lastName, email, avatar } = generateRandomUserData();
+			const response = await request.post('/api/users', {
+				data: {
+					email,
+					firstname: firstName,
+					lastname: lastName,
+					avatar,
+				},
+			});
+
+			await expectUnsuccessfulJsonResponse(response, 422);
+
+			const responseBody = await response.json();
+
+			try {
+				const fieldsRequired = ['email', 'firstname', 'lastname', 'password', 'avatar'];
+
+				expect(responseBody).toHaveProperty('error');
+				expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
+			} finally {
+				if (responseBody.id) {
+					await deleteUser(request, responseBody.id);
+				}
+			}
+		});
+
+		test('BUG: GET /api/users/:id should return 400 with invalid id used', async ({ request }) => {
+			test.fail(); // Bug: API returns 500 Internal Server Error (URIError: Failed to decode param) instead of 400 Bad Request
+
+			const response = await request.get('/api/users/%');
+
+			expect(response.status()).toBe(400);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error).toContain('Invalid user ID supplied');
+		});
+
+		test('BUG: GET /api/users/:id should return 404 for non-existing user', async ({ request }) => {
+			test.fail(); // Bug: Instead of error message API returns JSON with masked 'email', 'lastname', and 'password' fields
+
+			const response = await request.get('/api/users/999999999');
+
+			await expectUnsuccessfulJsonResponse(response, 404);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error).toContain('User does not exist');
+		});
+
+		test('BUG: PUT /api/users/:id should not update user without password provided', async ({ tempAuthUser }) => {
+			test.fail(); // Bug: API allows updating user without providing a password
+
+			const { user, request: authRequest } = tempAuthUser;
+			const newUserData = generateRandomUserData();
+			const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
+				data: {
+					email: newUserData.email,
+					firstname: user.firstName,
+					lastname: user.lastName,
+					avatar: user.avatar,
+				},
+			});
+
+			await expectUnsuccessfulJsonResponse(updatedResponse, 422);
+
+			const responseBody = await updatedResponse.json();
+			const fieldsRequired = ['email', 'firstname', 'lastname', 'password', 'avatar'];
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
+		});
 	});
 });
