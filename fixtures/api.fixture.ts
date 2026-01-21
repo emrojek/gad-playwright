@@ -8,6 +8,7 @@ type ApiFixtures = {
 		user: ApiUser;
 		request: APIRequestContext;
 	};
+	tempUser: ApiUser;
 };
 
 export const test = base.extend<ApiFixtures>({
@@ -48,6 +49,13 @@ export const test = base.extend<ApiFixtures>({
 
 		await authContext.delete(`/api/users/${user.id}`).catch(() => {});
 		await authContext.dispose();
+	},
+
+	tempUser: async ({ request }, use) => {
+		const user = await registerUserAPI(request);
+
+		await use(user);
+		await request.delete(`/api/users/${user.id}`).catch(() => {});
 	},
 });
 
