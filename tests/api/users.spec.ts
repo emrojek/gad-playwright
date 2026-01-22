@@ -13,15 +13,12 @@ test.describe('Users API', () => {
 	test.describe('Positive scenarios', () => {
 		test('GET /api/users should return list of users', async ({ request, tempUser }) => {
 			const response = await request.get('/api/users');
-
-			await expectSuccessfulJsonResponse(response);
-
-			const users = await response.json();
+			const users = await expectJsonResponseWithBody<ApiUserResponse[]>(response);
 
 			expect(users).toBeInstanceOf(Array);
 			expect(users.length).toBeGreaterThan(0);
 
-			const foundUser = users.find((user: ApiUserResponse) => user.id === tempUser.id);
+			const foundUser = users.find(user => user.id === tempUser.id);
 
 			expect(foundUser).toBeDefined();
 			expect(foundUser).toMatchObject({
@@ -45,10 +42,7 @@ test.describe('Users API', () => {
 					avatar,
 				},
 			});
-
-			await expectSuccessfulJsonResponse(response, 201);
-
-			const user = await response.json();
+			const user = await expectJsonResponseWithBody<ApiUserResponse>(response, 201);
 
 			try {
 				expect(user).toEqual({
@@ -93,7 +87,7 @@ test.describe('Users API', () => {
 					avatar,
 				},
 			});
-			const updatedUser = await expectJsonResponseWithBody(updatedResponse);
+			const updatedUser = await expectJsonResponseWithBody<ApiUserResponse>(updatedResponse);
 
 			expect(updatedUser).toEqual({
 				email,
@@ -113,7 +107,7 @@ test.describe('Users API', () => {
 					avatar: newUserData.avatar,
 				},
 			});
-			const updatedUser = await expectJsonResponseWithBody(updatedResponse);
+			const updatedUser = await expectJsonResponseWithBody<ApiUserResponse>(updatedResponse);
 
 			expect(updatedUser).toEqual({
 				email: user.email,
@@ -159,10 +153,7 @@ test.describe('Users API', () => {
 					avatar,
 				},
 			});
-
-			await expectSuccessfulJsonResponse(response, 201);
-
-			const user = await response.json();
+			const user = await expectJsonResponseWithBody<ApiUserResponse>(response, 201);
 			const duplicateResponse = await request.post('/api/users', {
 				data: {
 					email: user.email,
