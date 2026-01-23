@@ -69,9 +69,30 @@ export const expectJsonResponseWithBody = async <T = unknown>(
 };
 
 export const deleteUser = async (request: APIRequestContext, userId: number): Promise<void> => {
-	await request.delete(`/api/users/${userId}`).catch(() => {});
+	const response = await request.delete(`/api/users/${userId}`);
+	await expectSuccessfulJsonResponse(response);
 };
 
 export const deleteArticle = async (request: APIRequestContext, articleId: number): Promise<void> => {
-	await request.delete(`/api/articles/${articleId}`).catch(() => {});
+	const response = await request.delete(`/api/articles/${articleId}`);
+	await expectSuccessfulJsonResponse(response);
+};
+
+export const loginUserAPI = async (
+	request: APIRequestContext,
+	email: string,
+	password: string
+): Promise<{ access_token: string }> => {
+	const loginResponse = await request.post('/api/login', {
+		data: {
+			email,
+			password,
+		},
+	});
+	const responseBody = await expectJsonResponseWithBody<{ access_token: string }>(loginResponse);
+	const { access_token } = responseBody;
+
+	expect(access_token).toBeDefined();
+
+	return { access_token };
 };
