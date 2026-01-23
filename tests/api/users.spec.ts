@@ -5,8 +5,8 @@ import {
 	expectSuccessfulJsonResponse,
 	expectUnsuccessfulJsonResponse,
 	expectJsonResponseWithBody,
-	deleteUser,
 	ApiUserResponse,
+	loginUserAPI,
 } from '../../helpers/api-helpers';
 
 test.describe('Users API', () => {
@@ -54,7 +54,14 @@ test.describe('Users API', () => {
 					id: user.id,
 				});
 			} finally {
-				await deleteUser(request, user.id);
+				const { access_token } = await loginUserAPI(request, user.email, TEST_PASSWORDS.valid);
+				const deleteResponse = await request.delete(`/api/users/${user.id}`, {
+					headers: {
+						Authorization: `Bearer ${access_token}`,
+					},
+				});
+
+				await expectSuccessfulJsonResponse(deleteResponse);
 			}
 		});
 
@@ -76,11 +83,11 @@ test.describe('Users API', () => {
 		});
 
 		test('PUT /api/users/:id should update a specific user with all fields required', async ({ tempAuthUser }) => {
-			const { user, request: authRequest } = tempAuthUser;
-			const { firstName, lastName, email, avatar } = generateRandomUserData();
-			const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
+			const { user, userAuthRequest } = tempAuthUser;
+			const { firstName, lastName, avatar } = generateRandomUserData();
+			const updatedResponse = await userAuthRequest.put(`/api/users/${user.id}`, {
 				data: {
-					email,
+					email: user.email,
 					firstname: firstName,
 					lastname: lastName,
 					password: TEST_PASSWORDS.weak,
@@ -90,7 +97,7 @@ test.describe('Users API', () => {
 			const updatedUser = await expectJsonResponseWithBody<ApiUserResponse>(updatedResponse);
 
 			expect(updatedUser).toEqual({
-				email,
+				email: user.email,
 				firstname: firstName,
 				lastname: lastName,
 				password: TEST_PASSWORDS.weak,
@@ -100,9 +107,9 @@ test.describe('Users API', () => {
 		});
 
 		test('PATCH /api/users/:id should partially update a specific user', async ({ tempAuthUser }) => {
-			const { user, request: authRequest } = tempAuthUser;
+			const { user, userAuthRequest } = tempAuthUser;
 			const newUserData = generateRandomUserData();
-			const updatedResponse = await authRequest.patch(`/api/users/${user.id}`, {
+			const updatedResponse = await userAuthRequest.patch(`/api/users/${user.id}`, {
 				data: {
 					avatar: newUserData.avatar,
 				},
@@ -119,13 +126,13 @@ test.describe('Users API', () => {
 			});
 		});
 
-		test('DELETE /api/users/:id should delete a user', async ({ tempAuthUser }) => {
-			const { user, request: authRequest } = tempAuthUser;
-			const response = await authRequest.delete(`/api/users/${user.id}`);
+		test('DELETE /api/users/:id should delete a user', async ({ tempAuthUserNoCleanup }) => {
+			const { user, userAuthRequest } = tempAuthUserNoCleanup;
+			const response = await userAuthRequest.delete(`/api/users/${user.id}`);
 
 			await expectSuccessfulJsonResponse(response);
 
-			const getResponse = await authRequest.get(`/api/users/${user.id}`);
+			const getResponse = await userAuthRequest.get(`/api/users/${user.id}`);
 
 			expect(getResponse.status()).toBe(404);
 		});
@@ -172,7 +179,14 @@ test.describe('Users API', () => {
 				expect(duplicateBody).toHaveProperty('error');
 				expect(duplicateBody.error.message).toBe('Email not unique');
 			} finally {
-				await deleteUser(request, user.id);
+				const { access_token } = await loginUserAPI(request, user.email, TEST_PASSWORDS.valid);
+				const deleteResponse = await request.delete(`/api/users/${user.id}`, {
+					headers: {
+						Authorization: `Bearer ${access_token}`,
+					},
+				});
+
+				await expectSuccessfulJsonResponse(deleteResponse);
 			}
 		});
 
@@ -191,8 +205,8 @@ test.describe('Users API', () => {
 		});
 
 		test('PUT /api/users/:id should return 400 with invalid JSON sent', async ({ tempAuthUser }) => {
-			const { user, request: authRequest } = tempAuthUser;
-			const response = await authRequest.put(`/api/users/${user.id}`, {
+			const { user, userAuthRequest } = tempAuthUser;
+			const response = await userAuthRequest.put(`/api/users/${user.id}`, {
 				headers: { 'Content-Type': 'application/json' },
 				data: '{"invalidJson": "true",',
 			});
@@ -228,8 +242,8 @@ test.describe('Users API', () => {
 		test('PUT /api/users/:id should return 422 with any of the required fields missing', async ({
 			tempAuthUser,
 		}) => {
-			const { user, request: authRequest } = tempAuthUser;
-			const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
+			const { user, userAuthRequest } = tempAuthUser;
+			const updatedResponse = await userAuthRequest.put(`/api/users/${user.id}`, {
 				data: {
 					email: user.email,
 					firstname: user.firstName,
@@ -265,16 +279,10 @@ test.describe('Users API', () => {
 
 			const responseBody = await response.json();
 
-			try {
-				const fieldsRequired = ['email', 'firstname', 'lastname', 'password', 'avatar'];
+			const fieldsRequired = ['email', 'firstname', 'lastname', 'password', 'avatar'];
 
-				expect(responseBody).toHaveProperty('error');
-				expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
-			} finally {
-				if (responseBody.id) {
-					await deleteUser(request, responseBody.id);
-				}
-			}
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
 		});
 
 		test('BUG: GET /api/users/:id should return 400 with invalid id used', async ({ request }) => {
@@ -306,9 +314,9 @@ test.describe('Users API', () => {
 		test('BUG: PUT /api/users/:id should not update user without password provided', async ({ tempAuthUser }) => {
 			test.fail(); // Bug: API allows updating user without providing a password
 
-			const { user, request: authRequest } = tempAuthUser;
+			const { user, userAuthRequest } = tempAuthUser;
 			const newUserData = generateRandomUserData();
-			const updatedResponse = await authRequest.put(`/api/users/${user.id}`, {
+			const updatedResponse = await userAuthRequest.put(`/api/users/${user.id}`, {
 				data: {
 					email: newUserData.email,
 					firstname: user.firstName,
