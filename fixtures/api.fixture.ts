@@ -1,24 +1,30 @@
 import { test as base, APIRequestContext } from '@playwright/test';
-import { expectJsonResponseWithBody, registerUserAPI, type ApiUser } from '../helpers/api-helpers';
+import { registerUserAPI, deleteUser, loginUserAPI, type ApiUser } from '../helpers/api-helpers';
 import fs from 'fs';
 
 type ApiFixtures = {
 	authRequest: APIRequestContext;
 	tempAuthUser: {
 		user: ApiUser;
-		request: APIRequestContext;
+		userAuthRequest: APIRequestContext;
+	};
+	tempAuthUserNoCleanup: {
+		user: ApiUser;
+		userAuthRequest: APIRequestContext;
 	};
 	tempUser: ApiUser;
 };
 
 export const test = base.extend<ApiFixtures>({
-	authRequest: async ({ playwright }, use) => {
+	authRequest: async ({ request, playwright }, use) => {
 		const authData = JSON.parse(fs.readFileSync('.auth/api-user.json', 'utf-8'));
+
+		const { access_token } = await loginUserAPI(request, authData.userEmail, authData.userPassword);
 
 		const context = await playwright.request.newContext({
 			baseURL: 'http://localhost:3000',
 			extraHTTPHeaders: {
-				Authorization: `Bearer ${authData.access_token}`,
+				Authorization: `Bearer ${access_token}`,
 			},
 		});
 
@@ -28,16 +34,7 @@ export const test = base.extend<ApiFixtures>({
 
 	tempAuthUser: async ({ request, playwright }, use) => {
 		const user = await registerUserAPI(request);
-
-		const loginResponse = await request.post('/api/login', {
-			data: {
-				email: user.email,
-				password: user.password,
-			},
-		});
-
-		const { access_token } = await expectJsonResponseWithBody<{ access_token: string }>(loginResponse);
-
+		const { access_token } = await loginUserAPI(request, user.email, user.password);
 		const authContext = await playwright.request.newContext({
 			baseURL: 'http://localhost:3000',
 			extraHTTPHeaders: {
@@ -45,17 +42,38 @@ export const test = base.extend<ApiFixtures>({
 			},
 		});
 
-		await use({ user, request: authContext });
-
-		await authContext.delete(`/api/users/${user.id}`).catch(() => {});
+		await use({ user, userAuthRequest: authContext });
+		await deleteUser(authContext, user.id);
 		await authContext.dispose();
 	},
 
-	tempUser: async ({ request }, use) => {
+	tempUser: async ({ request, playwright }, use) => {
 		const user = await registerUserAPI(request);
+		const { access_token } = await loginUserAPI(request, user.email, user.password);
+		const authContext = await playwright.request.newContext({
+			baseURL: 'http://localhost:3000',
+			extraHTTPHeaders: {
+				Authorization: `Bearer ${access_token}`,
+			},
+		});
 
 		await use(user);
-		await request.delete(`/api/users/${user.id}`).catch(() => {});
+		await deleteUser(authContext, user.id);
+		await authContext.dispose();
+	},
+
+	tempAuthUserNoCleanup: async ({ request, playwright }, use) => {
+		const user = await registerUserAPI(request);
+		const { access_token } = await loginUserAPI(request, user.email, user.password);
+		const authContext = await playwright.request.newContext({
+			baseURL: 'http://localhost:3000',
+			extraHTTPHeaders: {
+				Authorization: `Bearer ${access_token}`,
+			},
+		});
+
+		await use({ user, userAuthRequest: authContext });
+		await authContext.dispose();
 	},
 });
 
