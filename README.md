@@ -15,11 +15,11 @@ Project has been created for educational purposes to improve skills of automatio
 
 ## 🏗️ Architecture Highlights
 
--   **Functional Page Objects** – Pure functions instead of classes for better composability
--   **API Testing Support** – Dedicated project configuration for fast, headless API tests
--   **Custom Fixtures** – Reusable test setup with automatic cleanup (`validUser`, `pages`)
--   **Test Data Helpers** – Faker.js integration for deterministic random data generation
--   **Auth State Management** – StorageState caching for tests requiring authenticated user sessions
+- **Functional Page Objects** – Pure functions instead of classes for better composability
+- **API Testing Support** – Dedicated project configuration for fast, headless API tests
+- **Custom Fixtures** – Reusable test setup with automatic cleanup (`validUser`, `pages`)
+- **Test Data Helpers** – Faker.js integration for deterministic random data generation
+- **Auth State Management** – StorageState caching for tests requiring authenticated user sessions
 
 ## 📂 Project Structure
 
@@ -63,8 +63,8 @@ gad-playwright/
 
 ### Prerequisites
 
--   Node.js 20.x or higher
--   Git installed
+- Node.js 20.x or higher
+- Git installed
 
 ### Installation
 
@@ -91,6 +91,7 @@ Start the GAD application in a separate terminal:
 
 ```bash
 cd path_to/gad-gui-api-demo
+npm i
 npm run start
 ```
 
@@ -108,23 +109,27 @@ webServer: {
 
 This will automatically start the application with tests and stop it after execution is finished.
 
-#### Option 3: Custom Bash Script (Windows + Git Bash)
+#### Option 3: Docker
 
-Create a `start-gad.sh` script in your GAD application folder:
+Run GAD application using Docker without any local Node.js setup.
+
+**Prerequisites:**
+
+- [Docker](https://docs.docker.com/get-started/get-docker/) installed
 
 ```bash
-#!/bin/bash
-echo "GAD starting..."
-echo "3 seconds remaining to browser open..."
-
-(sleep 3 && start http://localhost:3000) & npm run start
+docker run -p 3000:3000 -d jaktestowac/gad
 ```
 
-Create a desktop shortcut from `git-bash.exe` file (default file location is `C:\Program Files\Git`) with the following target element:
+Application will be available at `http://localhost:3000`
+
+To stop the container:
 
 ```
-"C:\Program Files\Git\git-bash.exe" --cd=C:\Projects\gad-gui-api-demo -c "./start-gad.sh; exec bash"
+docker stop $(docker ps -q --filter ancestor=jaktestowac/gad)
 ```
+
+> **Note:** Images are maintained by jaktestowac.pl team and available at [Docker Hub](https://hub.docker.com/r/jaktestowac/gad)
 
 ### Running Tests
 
