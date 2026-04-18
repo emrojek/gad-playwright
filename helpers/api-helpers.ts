@@ -1,4 +1,4 @@
-import { expect, APIResponse, APIRequestContext } from '@playwright/test';
+import { expect, APIResponse, APIRequest, APIRequestContext } from '@playwright/test';
 import { TEST_PASSWORDS } from './test-constants';
 import { generateRandomUserData } from './generate-random-data';
 
@@ -95,4 +95,19 @@ export const loginUserAPI = async (
 	expect(access_token).toBeDefined();
 
 	return { access_token };
+};
+
+export const createAuthContext = async (
+	request: APIRequest,
+	baseURL: string | undefined,
+	token: string
+): Promise<APIRequestContext> => {
+	if (!baseURL) throw new Error('baseURL is not set');
+
+	return await request.newContext({
+		baseURL,
+		extraHTTPHeaders: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
 };
