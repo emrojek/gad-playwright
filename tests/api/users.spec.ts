@@ -149,6 +149,33 @@ test.describe('Users API', () => {
 	});
 
 	test.describe('Negative scenarios', () => {
+		test('GET /api/users/:id should return 404 for non-existing user', async ({ request }) => {
+			const response = await request.get('/api/users/999999999');
+
+			await expectUnsuccessfulJsonResponse(response, 404);
+		});
+
+		test('POST /api/users should not create a new user without all required fields', async ({ request }) => {
+			const { firstName, lastName, email, avatar } = generateRandomUserData();
+			const response = await request.post('/api/users', {
+				data: {
+					email,
+					firstname: firstName,
+					lastname: lastName,
+					avatar,
+				},
+			});
+
+			await expectUnsuccessfulJsonResponse(response, 422);
+
+			const responseBody = await response.json();
+
+			const fieldsRequired = ['email', 'firstname', 'lastname', 'password', 'avatar'];
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
+		});
+
 		test('POST /api/users should not create a new user with previously used email', async ({ request }) => {
 			const { firstName, lastName, email, avatar } = generateRandomUserData();
 			const response = await request.post('/api/users', {
@@ -259,61 +286,8 @@ test.describe('Users API', () => {
 			expect(responseBody).toHaveProperty('error');
 			expect(responseBody.error.details).toContain('lastname');
 		});
-	});
 
-	test.describe('Known bugs', { tag: '@bug' }, () => {
-		test('BUG: POST /api/users should not create a new user without all required fields', async ({ request }) => {
-			test.fail(); // Bug: API allows creating user without providing a password
-
-			const { firstName, lastName, email, avatar } = generateRandomUserData();
-			const response = await request.post('/api/users', {
-				data: {
-					email,
-					firstname: firstName,
-					lastname: lastName,
-					avatar,
-				},
-			});
-
-			await expectUnsuccessfulJsonResponse(response, 422);
-
-			const responseBody = await response.json();
-
-			const fieldsRequired = ['email', 'firstname', 'lastname', 'password', 'avatar'];
-
-			expect(responseBody).toHaveProperty('error');
-			expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
-		});
-
-		test('BUG: GET /api/users/:id should return 400 with invalid id used', async ({ request }) => {
-			test.fail(); // Bug: API returns 500 Internal Server Error (URIError: Failed to decode param) instead of 400 Bad Request
-
-			const response = await request.get('/api/users/%');
-
-			expect(response.status()).toBe(400);
-
-			const responseBody = await response.json();
-
-			expect(responseBody).toHaveProperty('error');
-			expect(responseBody.error).toContain('Invalid user ID supplied');
-		});
-
-		test('BUG: GET /api/users/:id should return 404 for non-existing user', async ({ request }) => {
-			test.fail(); // Bug: Instead of error message API returns JSON with masked 'email', 'lastname', and 'password' fields
-
-			const response = await request.get('/api/users/999999999');
-
-			await expectUnsuccessfulJsonResponse(response, 404);
-
-			const responseBody = await response.json();
-
-			expect(responseBody).toHaveProperty('error');
-			expect(responseBody.error).toContain('User does not exist');
-		});
-
-		test('BUG: PUT /api/users/:id should not update user without password provided', async ({ tempAuthUser }) => {
-			test.fail(); // Bug: API allows updating user without providing a password
-
+		test('PUT /api/users/:id should not update user without password provided', async ({ tempAuthUser }) => {
 			const { user, userAuthRequest } = tempAuthUser;
 			const newUserData = generateRandomUserData();
 			const updatedResponse = await userAuthRequest.put(`/api/users/${user.id}`, {
@@ -332,6 +306,21 @@ test.describe('Users API', () => {
 
 			expect(responseBody).toHaveProperty('error');
 			expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
+		});
+	});
+
+	test.describe('Known bugs', { tag: '@bug' }, () => {
+		test('BUG: GET /api/users/:id should return 400 with invalid id used', async ({ request }) => {
+			test.fail(); // Bug: API returns 500 Internal Server Error (URIError: Failed to decode param) instead of 400 Bad Request
+
+			const response = await request.get('/api/users/%');
+
+			expect(response.status()).toBe(400);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error).toContain('Invalid user ID supplied');
 		});
 	});
 });
