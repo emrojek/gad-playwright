@@ -296,5 +296,117 @@ test.describe('Articles API', () => {
 			expect(responseBody).toHaveProperty('error');
 			expect(responseBody.error.message).toBe('Access token not provided!');
 		});
+
+		test('POST /api/articles should not create a new article without all required fields', async ({
+			authRequest,
+		}) => {
+			const { title, body } = generateRandomArticleData();
+			const response = await authRequest.post('/api/articles', {
+				data: {
+					title,
+					body,
+				},
+			});
+
+			await expectUnsuccessfulJsonResponse(response, 422);
+
+			const responseBody = await response.json();
+			const fieldsRequired = ['user_id', 'title', 'body', 'date'];
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error.message).toBe('One of mandatory field is missing');
+			expect(responseBody.error.details).toEqual(expect.arrayContaining(fieldsRequired));
+		});
+
+		test('PUT /api/articles/:id should return 401 when updating another user article', async ({
+			authRequest,
+			tempAuthUser,
+		}) => {
+			const articleData = generateRandomArticleData();
+			const { userAuthRequest } = tempAuthUser;
+
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+			await expectSuccessfulJsonResponse(createResponse, 201);
+			const createdArticle = await createResponse.json();
+
+			try {
+				const updateArticleData = generateRandomArticleData();
+				const updateResponse = await userAuthRequest.put(`/api/articles/${createdArticle.id}`, {
+					data: updateArticleData,
+				});
+
+				await expectUnsuccessfulJsonResponse(updateResponse, 401);
+
+				const responseBody = await updateResponse.json();
+
+				expect(responseBody).toHaveProperty('error');
+				expect(responseBody.error.message).toBe('You can not edit articles if You are not an owner');
+			} finally {
+				await deleteArticle(authRequest, createdArticle.id);
+			}
+		});
+	});
+
+	test.describe('Known bugs', { tag: '@bug' }, () => {
+		test('BUG: PATCH /api/articles/:id should return 401 when partial updating another user article', async ({
+			authRequest,
+			tempAuthUser,
+		}) => {
+			test.fail(); // Bug: Error message should be more descriptive and similar to the one in PUT request.
+			// Message from PATCH request suggest that this is an authentication issue rather than authorization.
+			// Received: "Access token for given user is invalid!"
+
+			const articleData = generateRandomArticleData();
+			const { userAuthRequest } = tempAuthUser;
+
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+			await expectSuccessfulJsonResponse(createResponse, 201);
+			const createdArticle = await createResponse.json();
+
+			try {
+				const { title } = generateRandomArticleData();
+				const updateResponse = await userAuthRequest.patch(`/api/articles/${createdArticle.id}`, {
+					data: { title },
+				});
+
+				await expectUnsuccessfulJsonResponse(updateResponse, 401);
+
+				const responseBody = await updateResponse.json();
+
+				expect(responseBody).toHaveProperty('error');
+				expect(responseBody.error.message).toBe('You can not edit articles if You are not an owner');
+			} finally {
+				await deleteArticle(authRequest, createdArticle.id);
+			}
+		});
+
+		test('BUG: DELETE /api/articles/:id should return 401 when deleting another user article', async ({
+			authRequest,
+			tempAuthUser,
+		}) => {
+			test.fail(); // Bug: Error message should be more descriptive and similar to the one in PUT request.
+			// Message from DELETE request suggest that this is an authentication issue rather than authorization.
+			// Received: "Access token for given user is invalid!"
+
+			const articleData = generateRandomArticleData();
+			const { userAuthRequest } = tempAuthUser;
+
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+			await expectSuccessfulJsonResponse(createResponse, 201);
+			const createdArticle = await createResponse.json();
+
+			try {
+				const deleteAttemptResponse = await userAuthRequest.delete(`/api/articles/${createdArticle.id}`);
+
+				await expectUnsuccessfulJsonResponse(deleteAttemptResponse, 401);
+
+				const responseBody = await deleteAttemptResponse.json();
+
+				expect(responseBody).toHaveProperty('error');
+				expect(responseBody.error.message).toBe('You can not edit articles if You are not an owner');
+			} finally {
+				await deleteArticle(authRequest, createdArticle.id);
+			}
+		});
 	});
 });
