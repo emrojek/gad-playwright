@@ -74,16 +74,11 @@ test.describe('Articles API', () => {
 		});
 
 		test('GET /api/articles/:id should return a single article', async ({ authRequest }) => {
-			const { title, body, date, image } = generateRandomArticleData();
-			const createResponse = await authRequest.post('/api/articles', {
-				data: {
-					title,
-					body,
-					date,
-					image,
-				},
-			});
+			const articleData = generateRandomArticleData();
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+
 			await expectSuccessfulJsonResponse(createResponse, 201);
+
 			const createdArticle = await createResponse.json();
 
 			try {
@@ -100,35 +95,22 @@ test.describe('Articles API', () => {
 		test('PUT /api/articles/:id should update a specific article with all fields required', async ({
 			authRequest,
 		}) => {
-			const { title, body, date, image } = generateRandomArticleData();
-			const createResponse = await authRequest.post('/api/articles', {
-				data: {
-					title,
-					body,
-					date,
-					image,
-				},
-			});
+			const articleData = generateRandomArticleData();
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+
 			await expectSuccessfulJsonResponse(createResponse, 201);
+
 			const createdArticle = await createResponse.json();
 
 			try {
-				const { title: newTitle, body: newBody, date: newDate, image: newImage } = generateRandomArticleData();
+				const updateArticleData = generateRandomArticleData();
 				const updatedResponse = await authRequest.put(`/api/articles/${createdArticle.id}`, {
-					data: {
-						title: newTitle,
-						body: newBody,
-						date: newDate,
-						image: newImage,
-					},
+					data: updateArticleData,
 				});
 
 				const updatedArticle = await expectJsonResponseWithBody(updatedResponse);
 				expect(updatedArticle).toEqual({
-					title: newTitle,
-					body: newBody,
-					date: newDate,
-					image: newImage,
+					...updateArticleData,
 					id: createdArticle.id,
 					user_id: createdArticle.user_id,
 				});
@@ -138,34 +120,23 @@ test.describe('Articles API', () => {
 		});
 
 		test('PATCH /api/articles/:id should partially update a specific article', async ({ authRequest }) => {
-			const { title, body, date, image } = generateRandomArticleData();
-			const createResponse = await authRequest.post('/api/articles', {
-				data: {
-					title,
-					body,
-					date,
-					image,
-				},
-			});
+			const articleData = generateRandomArticleData();
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+
 			await expectSuccessfulJsonResponse(createResponse, 201);
+
 			const createdArticle = await createResponse.json();
 
 			try {
-				const updateTitle = generateRandomArticleData();
+				const { title } = generateRandomArticleData();
 				const updatedResponse = await authRequest.patch(`/api/articles/${createdArticle.id}`, {
-					data: {
-						title: updateTitle.title,
-					},
+					data: { title },
 				});
 
 				const updatedArticle = await expectJsonResponseWithBody(updatedResponse);
 				expect(updatedArticle).toEqual({
-					title: updateTitle.title,
-					body: createdArticle.body,
-					date: createdArticle.date,
-					image: createdArticle.image,
-					id: createdArticle.id,
-					user_id: createdArticle.user_id,
+					...createdArticle,
+					title,
 				});
 			} finally {
 				await deleteArticle(authRequest, createdArticle.id);
@@ -173,16 +144,11 @@ test.describe('Articles API', () => {
 		});
 
 		test('DELETE /api/articles/:id should delete a specific article', async ({ authRequest }) => {
-			const { title, body, date, image } = generateRandomArticleData();
-			const createResponse = await authRequest.post('/api/articles', {
-				data: {
-					title,
-					body,
-					date,
-					image,
-				},
-			});
+			const articleData = generateRandomArticleData();
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+
 			await expectSuccessfulJsonResponse(createResponse, 201);
+
 			const createdArticle = await createResponse.json();
 
 			let deleted = false;
@@ -201,24 +167,19 @@ test.describe('Articles API', () => {
 		});
 
 		test('HEAD /api/articles/:id should return headers without body', async ({ authRequest }) => {
-			const { title, body, date, image } = generateRandomArticleData();
-			const createResponse = await authRequest.post('/api/articles', {
-				data: {
-					title,
-					body,
-					date,
-					image,
-				},
-			});
+			const articleData = generateRandomArticleData();
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+
 			await expectSuccessfulJsonResponse(createResponse, 201);
+
 			const createdArticle = await createResponse.json();
 
 			try {
 				const response = await authRequest.head(`/api/articles/${createdArticle.id}`);
 				await expectSuccessfulJsonResponse(response);
 
-				const requestBody = await response.text();
-				expect(requestBody).toBe('');
+				const responseBody = await response.text();
+				expect(responseBody).toBe('');
 			} finally {
 				await deleteArticle(authRequest, createdArticle.id);
 			}
@@ -233,15 +194,8 @@ test.describe('Articles API', () => {
 		});
 
 		test('POST /api/articles should return 401 without authorization', async ({ request }) => {
-			const { title, body, date, image } = generateRandomArticleData();
-			const response = await request.post('/api/articles', {
-				data: {
-					title,
-					body,
-					date,
-					image,
-				},
-			});
+			const articleData = generateRandomArticleData();
+			const response = await request.post('/api/articles', { data: articleData });
 
 			await expectUnsuccessfulJsonResponse(response, 401);
 
@@ -252,15 +206,8 @@ test.describe('Articles API', () => {
 		});
 
 		test('PUT /api/articles/:id should return 401 without authorization', async ({ request }) => {
-			const { title, body, date, image } = generateRandomArticleData();
-			const response = await request.put('/api/articles/1', {
-				data: {
-					title,
-					body,
-					date,
-					image,
-				},
-			});
+			const articleData = generateRandomArticleData();
+			const response = await request.put('/api/articles/1', { data: articleData });
 
 			await expectUnsuccessfulJsonResponse(response, 401);
 
@@ -345,6 +292,70 @@ test.describe('Articles API', () => {
 				await deleteArticle(authRequest, createdArticle.id);
 			}
 		});
+
+		test('POST /api/articles should return 400 with invalid JSON sent', async ({ authRequest }) => {
+			const response = await authRequest.post('/api/articles', {
+				headers: { 'Content-Type': 'application/json' },
+				data: '{"invalidJson": "true",',
+			});
+
+			await expectUnsuccessfulJsonResponse(response);
+
+			const responseBody = await response.json();
+
+			expect(responseBody).toHaveProperty('error');
+			expect(responseBody.error).toContain('Unexpected data in JSON');
+		});
+
+		test('PUT /api/articles/:id should return 400 with invalid JSON sent', async ({ authRequest }) => {
+			const articleData = generateRandomArticleData();
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+
+			await expectSuccessfulJsonResponse(createResponse, 201);
+
+			const createdArticle = await createResponse.json();
+
+			try {
+				const response = await authRequest.put(`/api/articles/${createdArticle.id}`, {
+					headers: { 'Content-Type': 'application/json' },
+					data: '{"invalidJson": "true",',
+				});
+
+				await expectUnsuccessfulJsonResponse(response);
+
+				const responseBody = await response.json();
+
+				expect(responseBody).toHaveProperty('error');
+				expect(responseBody.error).toContain('Unexpected data in JSON');
+			} finally {
+				await deleteArticle(authRequest, createdArticle.id);
+			}
+		});
+
+		test('PATCH /api/articles/:id should return 400 with invalid JSON sent', async ({ authRequest }) => {
+			const articleData = generateRandomArticleData();
+			const createResponse = await authRequest.post('/api/articles', { data: articleData });
+
+			await expectSuccessfulJsonResponse(createResponse, 201);
+
+			const createdArticle = await createResponse.json();
+
+			try {
+				const response = await authRequest.patch(`/api/articles/${createdArticle.id}`, {
+					headers: { 'Content-Type': 'application/json' },
+					data: '{"invalidJson": "true",',
+				});
+
+				await expectUnsuccessfulJsonResponse(response);
+
+				const responseBody = await response.json();
+
+				expect(responseBody).toHaveProperty('error');
+				expect(responseBody.error).toContain('Unexpected data in JSON');
+			} finally {
+				await deleteArticle(authRequest, createdArticle.id);
+			}
+		});
 	});
 
 	test.describe('Known bugs', { tag: '@bug' }, () => {
@@ -353,7 +364,7 @@ test.describe('Articles API', () => {
 			tempAuthUser,
 		}) => {
 			test.fail(); // Bug: Error message should be more descriptive and similar to the one in PUT request.
-			// Message from PATCH request suggest that this is an authentication issue rather than authorization.
+			// Message from PATCH request suggests that this is an authentication issue rather than authorization.
 			// Received: "Access token for given user is invalid!"
 
 			const articleData = generateRandomArticleData();
@@ -385,7 +396,7 @@ test.describe('Articles API', () => {
 			tempAuthUser,
 		}) => {
 			test.fail(); // Bug: Error message should be more descriptive and similar to the one in PUT request.
-			// Message from DELETE request suggest that this is an authentication issue rather than authorization.
+			// Message from DELETE request suggests that this is an authentication issue rather than authorization.
 			// Received: "Access token for given user is invalid!"
 
 			const articleData = generateRandomArticleData();
